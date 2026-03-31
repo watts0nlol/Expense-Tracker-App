@@ -1,0 +1,44 @@
+# Personal Expense Tracker
+
+A web-based expense tracking application built with Flask and SQLite.
+
+
+## Requirements
+
+- Python 3.9 or higher
+- pip
+
+
+## Setup
+
+1. Clone the repository and navigate into the project folder.
+
+2. Install all dependencies by running: pip install -r requirements.txt
+  
+4. To access the categories in the expense tracker, run in terminal: python seed_categories.py
+   This only needs to be done once.
+
+5. Start the app by running: python app.py
+
+6. Open your browser and go to: http://127.0.0.1:5000
+
+## First Use
+
+Go to http://127.0.0.1:5000/register and create an account, then log in at /login. From there you can start adding expenses on the Dashboard.
+
+
+## Pages
+
+- /dashboard — Add expenses and view your monthly summary
+- /expenses-page — View, filter, edit, delete, and export your expenses
+- /analytics-page — Spending insights, trends, goals, reflections, and unusual spending detection
+- /login — Log in to your account
+- /register — Create a new account
+- /logout-page — Log out
+
+
+## Notes
+
+- The instance folder and .env file are not included in the repository for security reasons
+- Unusual spending detection requires at least 2 months of recorded expenses to compare against
+- CSV export is available on the Expenses page and can be filtered by month
