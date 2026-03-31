@@ -15,8 +15,7 @@ A web-based expense tracking application built with Flask and SQLite.
 
 2. Install all dependencies by running: pip install -r requirements.txt
   
-4. To access the categories in the expense tracker, run in terminal: python seed_categories.py
-   This only needs to be done once.
+4. To access the categories in the expense tracker, run in terminal: python seed_categories.py. When resetting the app, make sure to delete expenses.db under instances and rerun this before starting app.py.
 
 5. Start the app by running: python app.py
 
