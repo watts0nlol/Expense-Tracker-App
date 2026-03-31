@@ -1,0 +1,209 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: sans-serif;
+  font-size: 15px;
+  background: #f5f5f5;
+  color: #222;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* ── Nav ─────────────────────────────────────────────────────────────────── */
+nav {
+  background: #2d6a4f;
+  padding: 0.6rem 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 6px;
+  border-bottom: none;
+}
+
+nav a {
+  color: #d8f3dc;
+  text-decoration: none;
+  margin-right: 1rem;
+  font-weight: 500;
+}
+
+nav a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* ── Headings ────────────────────────────────────────────────────────────── */
+h1 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #1a1a1a;
+}
+
+h2 {
+  font-size: 1.1rem;
+  margin-bottom: 0.6rem;
+  margin-top: 0.25rem;
+  color: #333;
+}
+
+h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #444;
+}
+
+/* ── Form Elements ───────────────────────────────────────────────────────── */
+label {
+  display: block;
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #555;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  margin-top: 0.25rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-family: sans-serif;
+  background: #fff;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #2d6a4f;
+}
+
+input[type="month"],
+input[type="date"] {
+  width: auto;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+button {
+  margin-top: 0.75rem;
+  padding: 0.45rem 1rem;
+  font-size: 0.875rem;
+  font-family: sans-serif;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: #2d6a4f;
+  color: #fff;
+}
+
+button:hover {
+  background: #235c42;
+}
+
+/* Secondary-style buttons sitting next to a primary one */
+button + button {
+  background: #fff;
+  color: #333;
+  border: 1px solid #ccc;
+  margin-left: 0.4rem;
+}
+
+button + button:hover {
+  border-color: #2d6a4f;
+  color: #2d6a4f;
+}
+
+/* ── Table ───────────────────────────────────────────────────────────────── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.75rem;
+  background: #fff;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+}
+
+th {
+  background: #f0f0f0;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #666;
+  padding: 0.55rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+td {
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:hover td {
+  background: #fafafa;
+}
+
+/* ── Messages ────────────────────────────────────────────────────────────── */
+#message {
+  color: #2d6a4f;
+  font-size: 0.875rem;
+  min-height: 1.2rem;
+  margin-bottom: 0.25rem;
+}
+
+#error {
+  color: #c0392b;
+  font-size: 0.875rem;
+  min-height: 1.2rem;
+  margin-bottom: 0.25rem;
+}
+
+/* ── HR divider ──────────────────────────────────────────────────────────── */
+hr {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 1.5rem 0;
+}
+
+/* ── Links ───────────────────────────────────────────────────────────────── */
+a {
+  color: black;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+p {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* ── List (notifications) ────────────────────────────────────────────────── */
+ul {
+  padding-left: 1.25rem;
+  margin-top: 0.5rem;
+}
+
+li {
+  margin-bottom: 0.4rem;
+  font-size: 0.9rem;
+}
+
+/* ── Textarea ────────────────────────────────────────────────────────────── */
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}

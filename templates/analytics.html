@@ -1,0 +1,350 @@
+{% extends "base.html" %}
+{% block title %}Analytics{% endblock %}
+{% block content %}
+<h1>Analytics & Insights</h1>
+
+<!-- Monthly Summary -->
+<h2>Monthly Summary</h2>
+<label>Month</label>
+<input type="month" id="summary-month" style="width:auto;"/>
+<button onclick="loadSummary()">Load</button>
+<p>Total spent: <strong id="summary-total">—</strong></p>
+<p>Top category: <strong id="summary-top">—</strong></p>
+<table id="summary-table" style="display:none;">
+  <thead><tr><th>Category</th><th>Total ($)</th><th>%</th></tr></thead>
+  <tbody id="summary-body"></tbody>
+</table>
+
+<hr/>
+
+<!-- Month-over-Month Comparison -->
+<h2>Month-over-Month Comparison</h2>
+<label>Compare month</label>
+<input type="month" id="compare-month" style="width:auto;"/>
+<button onclick="loadComparison()">Compare</button>
+<table id="compare-table" style="display:none;">
+  <thead><tr><th>Category</th><th>Last Month ($)</th><th>This Month ($)</th><th>Change ($)</th></tr></thead>
+  <tbody id="compare-body"></tbody>
+</table>
+
+<hr/>
+
+<!-- Unusual Spending -->
+<h2>Unusual Spending Detection</h2>
+<p>
+  This automatically compares your spending per category this month against your historical average.
+  If any category is <strong>50% or more above your usual average</strong>, it gets flagged here.
+</p>
+<p>
+  <strong>Requirements:</strong> You need at least 2 months of recorded expenses for a category before it can be compared.
+  The more months of data you have, the more accurate the detection becomes.
+</p>
+<p>
+  <strong>No setup needed</strong> — just record your expenses regularly and check back here each month.
+  Any notifications generated are also saved under the Notifications section below.
+</p>
+<br/>
+<button onclick="loadUnusual()">Check for Unusual Spending</button>
+<div id="unusual-result"></div>
+
+<hr/>
+
+<!-- Spending Goals -->
+<h2>Spending Goals</h2>
+<p>
+  Set a spending limit for a category in a given month. The tracker will show how much you have spent
+  versus your limit so you can stay on track.
+</p>
+<p>
+  <strong>How to set one up:</strong> Choose a month, pick a category (e.g. Food & Dining), enter a dollar limit,
+  and click Set Goal. You can set one goal per category per month. To update a limit just set it again —
+  it will overwrite the existing one.
+</p>
+<label>View goals for month:</label>
+<input type="month" id="goal-month" style="width:auto;"/>
+<button onclick="loadGoals()">Load Goals</button>
+<table id="goals-table" style="display:none;">
+  <thead><tr><th>Category</th><th>Limit ($)</th><th>Spent ($)</th><th>Remaining ($)</th><th>Actions</th></tr></thead>
+  <tbody id="goals-body"></tbody>
+</table>
+
+<h3>Set a Goal</h3>
+<label>Month</label>
+<input type="month" id="new-goal-month" style="width:auto;"/>
+<label>Category</label>
+<select id="new-goal-category">
+  <option value="">Loading...</option>
+</select>
+<label>Amount Limit ($)</label>
+<input type="number" id="new-goal-amount" step="0.01" placeholder="e.g. 200"/>
+<br/>
+<button onclick="setGoal()">Set Goal</button>
+
+<hr/>
+
+<!-- Monthly Reflection -->
+<h2>Monthly Reflection</h2>
+<label>Month</label>
+<input type="month" id="reflection-month" style="width:auto;"/>
+<button onclick="loadReflection()">Load</button>
+<br/><br/>
+<textarea id="reflection-content" rows="4" placeholder="Write your monthly spending reflection here..."></textarea>
+<br/>
+<button onclick="saveReflection()">Save Reflection</button>
+
+<hr/>
+
+<!-- Notifications -->
+<h2>Notifications</h2>
+<button onclick="loadNotifications()">Load Notifications</button>
+<ul id="notifications-list"></ul>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const today = new Date().toISOString().slice(0,7);
+  document.getElementById('summary-month').value    = today;
+  document.getElementById('compare-month').value    = today;
+  document.getElementById('goal-month').value       = today;
+  document.getElementById('new-goal-month').value   = today;
+  document.getElementById('reflection-month').value = today;
+
+  // Load categories for goal dropdown
+  async function loadCategories() {
+    const res = await fetch('/expenses/categories');
+    if (!res.ok) return;
+    const cats = await res.json();
+    const sel = document.getElementById('new-goal-category');
+    sel.innerHTML = '<option value="">All categories</option>';
+    cats.forEach(c => sel.innerHTML += `<option value="${c.categoryID}">${c.name}</option>`);
+  }
+
+  // ── Monthly Summary ────────────────────────────────────────────────────────
+  async function loadSummary() {
+    clearMsgs();
+    const month = document.getElementById('summary-month').value;
+    const res   = await fetch(`/analytics/summary?month=${month}`);
+    const data  = await res.json();
+
+    document.getElementById('summary-total').textContent = '$' + (data.total || 0).toFixed(2);
+
+    if (data.breakdown && data.breakdown.length > 0) {
+      document.getElementById('summary-top').textContent = data.breakdown[0].category;
+      document.getElementById('summary-body').innerHTML = data.breakdown.map(b =>
+        `<tr><td>${b.category}</td><td>$${b.total.toFixed(2)}</td><td>${b.percentage}%</td></tr>`
+      ).join('');
+      document.getElementById('summary-table').style.display = 'table';
+    } else {
+      document.getElementById('summary-top').textContent = '—';
+      document.getElementById('summary-table').style.display = 'none';
+    }
+  }
+
+  // ── Month Comparison ───────────────────────────────────────────────────────
+  async function loadComparison() {
+    clearMsgs();
+    const month   = document.getElementById('compare-month').value;
+    const [y, m]  = month.split('-').map(Number);
+    const prevMonth = m === 1 ? `${y-1}-12` : `${y}-${String(m-1).padStart(2,'0')}`;
+
+    const [curr, prev] = await Promise.all([
+      fetch(`/analytics/summary?month=${month}`).then(r => r.json()),
+      fetch(`/analytics/summary?month=${prevMonth}`).then(r => r.json()),
+    ]);
+
+    const allCats = [...new Set([
+      ...(curr.breakdown || []).map(b => b.category),
+      ...(prev.breakdown || []).map(b => b.category),
+    ])];
+
+    if (!allCats.length) {
+      showErr('No data to compare.');
+      return;
+    }
+
+    document.getElementById('compare-body').innerHTML = allCats.map(cat => {
+      const c = curr.breakdown?.find(b => b.category === cat)?.total ?? 0;
+      const p = prev.breakdown?.find(b => b.category === cat)?.total ?? 0;
+      const diff = (c - p).toFixed(2);
+      return `<tr><td>${cat}</td><td>$${p.toFixed(2)}</td><td>$${c.toFixed(2)}</td><td>${diff >= 0 ? '+' : ''}$${diff}</td></tr>`;
+    }).join('');
+    document.getElementById('compare-table').style.display = 'table';
+  }
+
+  // ── Unusual Spending ───────────────────────────────────────────────────────
+  async function loadUnusual() {
+    clearMsgs();
+    const el = document.getElementById('unusual-result');
+    el.innerHTML = '<p>Checking...</p>';
+
+    // Also fetch summary for current month to understand data context
+    const today = new Date().toISOString().slice(0, 7);
+    const [unusualRes, summaryRes, trendsRes] = await Promise.all([
+      fetch('/analytics/unusual'),
+      fetch(`/analytics/summary?month=${today}`),
+      fetch('/analytics/trends'),
+    ]);
+
+    const unusual = await unusualRes.json();
+    const summary = await summaryRes.json();
+    const trends  = await trendsRes.json();
+
+    const flags        = unusual.flags || [];
+    const monthsOfData = Object.keys(trends.trends || {}).length;
+    const hasThisMonth = summary.total > 0;
+    const breakdown    = summary.breakdown || [];
+
+    // ── Case 1: Real flags found — show them ──────────────────────────────
+    if (flags.length > 0) {
+      el.innerHTML =
+        '<p style="color:orange;"><strong>⚠ Unusual spending detected:</strong></p><ul>' +
+        flags.map(f =>
+          `<li><strong>${f.category}</strong>: $${f.current} this month vs your average of $${f.average} — that is ${f.percent_over}% above normal.</li>`
+        ).join('') +
+        '</ul>' +
+        '<p>Consider reviewing these categories and setting a spending goal to stay on track.</p>';
+
+    // ── Case 2: Not enough history yet (less than 2 months of data) ───────
+    } else if (monthsOfData < 2) {
+      el.innerHTML =
+        '<p><strong>Not enough data yet.</strong></p>' +
+        '<p>Unusual spending detection needs at least <strong>2 months</strong> of recorded expenses to compare against. ' +
+        'Keep logging your expenses and check back next month.</p>' +
+        '<p style="color:gray;"><em>Tip: You can backdate expenses using the date field on the dashboard to build up history faster.</em></p>';
+
+    // ── Case 3: Has history, has this month's data, nothing flagged ───────
+    } else if (monthsOfData >= 2 && hasThisMonth) {
+      const topCat = breakdown.length > 0 ? breakdown[0].category : null;
+      el.innerHTML =
+        '<p style="color:green;"><strong>✓ No unusual spending detected this month.</strong></p>' +
+        '<p>Your spending looks consistent with your historical patterns across all categories.</p>' +
+        (topCat
+          ? `<p>Your highest category this month is <strong>${topCat}</strong> at <strong>$${breakdown[0].total.toFixed(2)}</strong> — keep an eye on it if it tends to spike.</p>`
+          : '') +
+        '<p style="color:gray;"><em>The threshold is set to flag anything 50% above your usual average. ' +
+        'If you want to be more proactive, try setting a spending goal for your top categories.</em></p>';
+
+    // ── Case 4: Has history but no expenses recorded this month yet ───────
+    } else if (monthsOfData >= 2 && !hasThisMonth) {
+      el.innerHTML =
+        '<p><strong>No expenses recorded for this month yet.</strong></p>' +
+        '<p>Start logging your expenses on the dashboard and come back here to check for unusual patterns.</p>' +
+        '<p style="color:gray;"><em>You have ' + monthsOfData + ' month(s) of history on record — ' +
+        'detection will run automatically once you have some entries for this month.</em></p>';
+
+    // ── Case 5: Fallback — no data at all ────────────────────────────────
+    } else {
+      el.innerHTML =
+        '<p><strong>No expense data found.</strong></p>' +
+        '<p>Head to the <a href="/dashboard">dashboard</a> to start recording your expenses. ' +
+        'Once you have a couple months of data this section will automatically flag any categories ' +
+        'where you are spending significantly more than usual.</p>';
+    }
+  }
+
+  // ── Spending Goals ─────────────────────────────────────────────────────────
+  async function loadGoals() {
+    clearMsgs();
+    const month = document.getElementById('goal-month').value;
+    const res   = await fetch(`/analytics/goals?month=${month}`);
+    const goals = await res.json();
+
+    if (!goals.length) {
+      showMsg('No goals set for this month.');
+      document.getElementById('goals-table').style.display = 'none';
+      return;
+    }
+
+    document.getElementById('goals-body').innerHTML = goals.map(g => `
+      <tr>
+        <td>${g.categoryName || 'All'}</td>
+        <td>$${g.amountLimit.toFixed(2)}</td>
+        <td>$${g.spent.toFixed(2)}</td>
+        <td>$${g.remaining.toFixed(2)}</td>
+        <td><button onclick="deleteGoal(${g.goalID})">Delete</button></td>
+      </tr>
+    `).join('');
+    document.getElementById('goals-table').style.display = 'table';
+  }
+
+  async function setGoal() {
+    clearMsgs();
+    const res = await fetch('/analytics/goals', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        month:       document.getElementById('new-goal-month').value,
+        categoryID:  parseInt(document.getElementById('new-goal-category').value) || null,
+        amountLimit: parseFloat(document.getElementById('new-goal-amount').value),
+      })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      showMsg('Goal saved.');
+      loadGoals();
+    } else {
+      showErr(data.error);
+    }
+  }
+
+  async function deleteGoal(id) {
+    if (!confirm('Delete this goal?')) return;
+    const res = await fetch(`/analytics/goals/${id}`, { method: 'DELETE' });
+    if (res.ok) { showMsg('Goal deleted.'); loadGoals(); }
+  }
+
+  // ── Reflections ────────────────────────────────────────────────────────────
+  async function loadReflection() {
+    clearMsgs();
+    const month = document.getElementById('reflection-month').value;
+    const res   = await fetch(`/analytics/reflections?month=${month}`);
+    const data  = await res.json();
+    document.getElementById('reflection-content').value =
+      data.length > 0 ? data[0].content : '';
+  }
+
+  async function saveReflection() {
+    clearMsgs();
+    const res = await fetch('/analytics/reflections', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        month:   document.getElementById('reflection-month').value,
+        content: document.getElementById('reflection-content').value,
+      })
+    });
+    const data = await res.json();
+    if (res.ok) showMsg('Reflection saved.');
+    else showErr(data.error);
+  }
+
+  // ── Notifications ──────────────────────────────────────────────────────────
+  async function loadNotifications() {
+    clearMsgs();
+    const res   = await fetch('/analytics/notifications');
+    const notifs = await res.json();
+    const list  = document.getElementById('notifications-list');
+
+    if (!notifs.length) {
+      list.innerHTML = '<li>No notifications.</li>';
+      return;
+    }
+
+    list.innerHTML = notifs.map(n => `
+      <li>
+        ${n.isRead ? '' : '<strong>'} ${n.message} — <small>${n.timestamp}</small> ${n.isRead ? '' : '</strong>'}
+        ${!n.isRead ? `<button onclick="markRead(${n.alertID})">Mark as read</button>` : ''}
+      </li>
+    `).join('');
+  }
+
+  async function markRead(id) {
+    await fetch(`/analytics/notifications/${id}/read`, { method: 'PUT' });
+    loadNotifications();
+  }
+
+  loadCategories();
+  loadSummary();
+</script>
+{% endblock %}

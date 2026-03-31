@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+
+<h2>Add Expense</h2>
+<label>Amount ($)</label>
+<input type="number" id="amount" placeholder="0.00" min="0" step="0.01"/>
+<label>Date</label>
+<input type="date" id="date"/>
+<label>Category</label>
+<select id="categoryID">
+  <option value="">Loading categories...</option>
+</select>
+<label>Description</label>
+<input type="text" id="description" placeholder="What was this for?"/>
+<br/>
+<button onclick="addExpense()">Add Expense</button>
+
+<hr/>
+
+<h2>This Month Summary</h2>
+<label>View month:</label>
+<input type="month" id="month-picker" style="width:auto;"/>
+<button onclick="loadSummary()">Load</button>
+<p>Total: <strong id="summary-total">—</strong></p>
+<p>Top category: <strong id="summary-top">—</strong></p>
+
+<table id="breakdown-table" style="display:none;">
+  <thead><tr><th>Category</th><th>Total ($)</th><th>% of Spending</th></tr></thead>
+  <tbody id="breakdown-body"></tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Block page if not logged in
+  if (!localStorage.getItem('username')) {
+    document.querySelector('h1').textContent = 'Dashboard';
+    document.getElementById('message') && (document.getElementById('message').textContent = '');
+    document.body.innerHTML += '';
+    // Hide all content and show login prompt
+    document.querySelectorAll('h2, label, input, select, button, table, hr, p').forEach(el => el.style.display = 'none');
+    document.querySelector('h1').insertAdjacentHTML('afterend', '<p>Please <a href="/login">log in</a> to view your dashboard.</p>');
+  } else {
+    // Default date to today, month to current
+    document.getElementById('date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('month-picker').value = new Date().toISOString().slice(0,7);
+    loadCategories();
+    loadSummary();
+  }
+
+  // Load categories into dropdown
+  async function loadCategories() {
+    const res = await fetch('/expenses/categories');
+    if (!res.ok) return;
+    const cats = await res.json();
+    const sel = document.getElementById('categoryID');
+    sel.innerHTML = '<option value="">Select category...</option>';
+    cats.forEach(c => {
+      sel.innerHTML += `<option value="${c.categoryID}">${c.name}</option>`;
+    });
+  }
+
+  async function addExpense() {
+    clearMsgs();
+    const res = await fetch('/expenses/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount:      parseFloat(document.getElementById('amount').value),
+        date:        document.getElementById('date').value,
+        categoryID:  parseInt(document.getElementById('categoryID').value) || null,
+        description: document.getElementById('description').value,
+      })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      showMsg('Expense added successfully.');
+      document.getElementById('amount').value = '';
+      document.getElementById('description').value = '';
+      document.getElementById('categoryID').value = '';
+      loadSummary();
+    } else {
+      showErr(data.error);
+    }
+  }
+
+  async function loadSummary() {
+    clearMsgs();
+    const month = document.getElementById('month-picker').value;
+    const res = await fetch(`/analytics/summary?month=${month}`);
+    const data = await res.json();
+
+    document.getElementById('summary-total').textContent = '$' + (data.total || 0).toFixed(2);
+
+    if (data.breakdown && data.breakdown.length > 0) {
+      const top = data.breakdown[0];
+      document.getElementById('summary-top').textContent = top.category + ' ($' + top.total.toFixed(2) + ')';
+
+      const tbody = document.getElementById('breakdown-body');
+      tbody.innerHTML = data.breakdown.map(b =>
+        `<tr><td>${b.category}</td><td>$${b.total.toFixed(2)}</td><td>${b.percentage}%</td></tr>`
+      ).join('');
+      document.getElementById('breakdown-table').style.display = 'table';
+    } else {
+      document.getElementById('summary-top').textContent = '—';
+      document.getElementById('breakdown-table').style.display = 'none';
+    }
+  }
+</script>
+{% endblock %}

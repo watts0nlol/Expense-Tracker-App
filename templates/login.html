@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<h1>Login</h1>
+<label>Username</label>
+<input type="text" id="username" placeholder="Username"/>
+<label>Password</label>
+<input type="password" id="password" placeholder="Password"/>
+<br/>
+<button onclick="doLogin()">Login</button>
+<p>No account? <a href="/register">Register here</a></p>
+{% endblock %}
+{% block scripts %}
+<script>
+  async function doLogin() {
+    clearMsgs();
+    const res = await fetch('/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: document.getElementById('username').value,
+        password: document.getElementById('password').value,
+      })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      localStorage.setItem('username', data.username);
+      alert('Login confirmed! Welcome, ' + data.username + '.');
+      window.location.href = '/dashboard';
+    } else {
+      showErr(data.error);
+    }
+  }
+</script>
+{% endblock %}
