@@ -142,7 +142,7 @@
     cats.forEach(c => sel.innerHTML += `<option value="${c.categoryID}">${c.name}</option>`);
   }
 
-  // ── Monthly Summary ────────────────────────────────────────────────────────
+  //  Monthly Summary 
   async function loadSummary() {
     clearMsgs();
     const month = document.getElementById('summary-month').value;
@@ -163,7 +163,7 @@
     }
   }
 
-  // ── Month Comparison ───────────────────────────────────────────────────────
+  //  Month Comparison 
   async function loadComparison() {
     clearMsgs();
     const month = document.getElementById('compare-month').value;
@@ -194,7 +194,7 @@
     document.getElementById('compare-table').style.display = 'table';
   }
 
-  // ── Unusual Spending ───────────────────────────────────────────────────────
+  //  Unusual Spending 
   async function loadUnusual() {
     clearMsgs();
     const el = document.getElementById('unusual-result');
@@ -217,7 +217,7 @@
     const hasThisMonth = summary.total > 0;
     const breakdown = summary.breakdown || [];
 
-    // ── Case 1: Real flags found — show them ──────────────────────────────
+    //  Case 1: Real flags found — show them 
     if (flags.length > 0) {
       el.innerHTML =
         '<p style="color:orange;"><strong>⚠ Unusual spending detected:</strong></p><ul>' +
@@ -227,7 +227,7 @@
         '</ul>' +
         '<p>Consider reviewing these categories and setting a spending goal to stay on track.</p>';
 
-      // ── Case 2: Not enough history yet (less than 2 months of data) ───────
+      //  Case 2: Not enough history yet (less than 2 months of data) 
     } else if (monthsOfData < 2) {
       el.innerHTML =
         '<p><strong>Not enough data yet.</strong></p>' +
@@ -235,7 +235,7 @@
         'Keep logging your expenses and check back next month.</p>' +
         '<p style="color:gray;"><em>Tip: You can backdate expenses using the date field on the dashboard to build up history faster.</em></p>';
 
-      // ── Case 3: Has history, has this month's data, nothing flagged ───────
+      //  Case 3: Has history, has this month's data, nothing flagged 
     } else if (monthsOfData >= 2 && hasThisMonth) {
       const topCat = breakdown.length > 0 ? breakdown[0].category : null;
       el.innerHTML =
@@ -247,7 +247,7 @@
         '<p style="color:gray;"><em>The threshold is set to flag anything 50% above your usual average. ' +
         'If you want to be more proactive, try setting a spending goal for your top categories.</em></p>';
 
-      // ── Case 4: Has history but no expenses recorded this month yet ───────
+      //  Case 4: Has history but no expenses recorded this month yet 
     } else if (monthsOfData >= 2 && !hasThisMonth) {
       el.innerHTML =
         '<p><strong>No expenses recorded for this month yet.</strong></p>' +
@@ -255,7 +255,7 @@
         '<p style="color:gray;"><em>You have ' + monthsOfData + ' month(s) of history on record — ' +
         'detection will run automatically once you have some entries for this month.</em></p>';
 
-      // ── Case 5: Fallback — no data at all ────────────────────────────────
+      //  Case 5: Fallback — no data at all 
     } else {
       el.innerHTML =
         '<p><strong>No expense data found.</strong></p>' +
@@ -265,7 +265,7 @@
     }
   }
 
-  // ── Spending Goals ─────────────────────────────────────────────────────────
+  //  Spending Goals 
   async function loadGoals() {
     clearMsgs();
     const month = document.getElementById('goal-month').value;
@@ -316,7 +316,7 @@
     if (res.ok) { showMsg('Goal deleted.'); loadGoals(); }
   }
 
-  // ── Reflections ────────────────────────────────────────────────────────────
+  //  Reflections 
   async function loadReflection() {
     clearMsgs();
     const month = document.getElementById('reflection-month').value;
@@ -341,7 +341,7 @@
     else showErr(data.error);
   }
 
-  // ── Notifications ──────────────────────────────────────────────────────────
+  //  Notifications 
   async function loadNotifications() {
     clearMsgs();
     const res = await fetch('/analytics/notifications');

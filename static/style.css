@@ -14,7 +14,7 @@ body {
   padding: 1rem;
 }
 
-/* ── Nav ─────────────────────────────────────────────────────────────────── */
+/*  Nav  */
 nav {
   background: #2d6a4f;
   padding: 0.6rem 1rem;
@@ -35,7 +35,7 @@ nav a:hover {
   text-decoration: underline;
 }
 
-/* ── Headings ────────────────────────────────────────────────────────────── */
+/*  Headings  */
 h1 {
   font-size: 1.5rem;
   margin-bottom: 1rem;
@@ -55,7 +55,7 @@ h3 {
   color: #444;
 }
 
-/* ── Form Elements ───────────────────────────────────────────────────────── */
+/*  Form Elements  */
 label {
   display: block;
   margin-top: 0.6rem;
@@ -89,7 +89,7 @@ input[type="date"] {
   width: auto;
 }
 
-/* ── Buttons ─────────────────────────────────────────────────────────────── */
+/*  Buttons  */
 button {
   margin-top: 0.75rem;
   padding: 0.45rem 1rem;
@@ -119,7 +119,7 @@ button + button:hover {
   color: #2d6a4f;
 }
 
-/* ── Table ───────────────────────────────────────────────────────────────── */
+/*  Table  */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -155,7 +155,7 @@ tr:hover td {
   background: #fafafa;
 }
 
-/* ── Messages ────────────────────────────────────────────────────────────── */
+/*  Messages  */
 #message {
   color: #2d6a4f;
   font-size: 0.875rem;
@@ -170,14 +170,14 @@ tr:hover td {
   margin-bottom: 0.25rem;
 }
 
-/* ── HR divider ──────────────────────────────────────────────────────────── */
+/*  HR divider  */
 hr {
   border: none;
   border-top: 1px solid #ddd;
   margin: 1.5rem 0;
 }
 
-/* ── Links ───────────────────────────────────────────────────────────────── */
+/*  Links  */
 a {
   color: black;
 }
@@ -191,7 +191,7 @@ p {
   font-size: 0.9rem;
 }
 
-/* ── List (notifications) ────────────────────────────────────────────────── */
+/*  List (notifications)  */
 ul {
   padding-left: 1.25rem;
   margin-top: 0.5rem;
@@ -202,7 +202,7 @@ li {
   font-size: 0.9rem;
 }
 
-/* ── Textarea ────────────────────────────────────────────────────────────── */
+/*  Textarea  */
 textarea {
   resize: vertical;
   min-height: 80px;
