@@ -1,34 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>{% block title %}Expense Tracker{% endblock %}</title>
-  <link rel="stylesheet" href="/static/style.css"/>
-</head>
-<body>
-<nav>
-  <a href="/dashboard">Dashboard</a>
-  <a href="/expenses-page">Expenses</a>
-  <a href="/analytics-page">Analytics</a>
-  <a href="/login">Login</a>
-  <a href="/logout-page">Logout</a>
-  <span id="nav-username" style="float:right; color:#d8f3dc; font-size:0.9rem; line-height:1.6;"></span>
-</nav>
-<div id="message"></div>
-<div id="error"></div>
-{% block content %}{% endblock %}
-<script>
-  function showMsg(msg) { document.getElementById('message').textContent = msg; }
-  function showErr(msg) { document.getElementById('error').textContent = msg; }
-  function clearMsgs() { showMsg(''); showErr(''); }
 
-  // Show logged-in username in nav on every page
-  const storedUser = localStorage.getItem('username');
-  if (storedUser) {
-    document.getElementById('nav-username').textContent = '👤' + storedUser;
-  }
-</script>
-{% block scripts %}{% endblock %}
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Expense Tracker{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+
+<body>
+  <nav>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/expenses-page">Expenses</a>
+    <a href="/analytics-page">Analytics</a>
+    <a href="/login">Login</a>
+    <a href="/logout-page">Logout</a>
+    <span id="nav-username" style="float:right; color:#d8f3dc; font-size:0.9rem; line-height:1.6;"></span>
+  </nav>
+  <div id="message"></div>
+  <div id="error"></div>
+  {% block content %}{% endblock %}
+  <script>
+    function showMsg(msg) { document.getElementById('message').textContent = msg; }
+    function showErr(msg) { document.getElementById('error').textContent = msg; }
+    function clearMsgs() { showMsg(''); showErr(''); }
+
+    // Show logged-in username in nav on every page
+    const storedUser = localStorage.getItem('username');
+    if (storedUser) {
+      document.getElementById('nav-username').textContent = '👤' + storedUser;
+    }
+  </script>
+  {% block scripts %}{% endblock %}
 </body>
+
 </html>

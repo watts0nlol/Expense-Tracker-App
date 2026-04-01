@@ -5,29 +5,35 @@
 
 <h2>Add Expense</h2>
 <label>Amount ($)</label>
-<input type="number" id="amount" placeholder="0.00" min="0" step="0.01"/>
+<input type="number" id="amount" placeholder="0.00" min="0" step="0.01" />
 <label>Date</label>
-<input type="date" id="date"/>
+<input type="date" id="date" />
 <label>Category</label>
 <select id="categoryID">
   <option value="">Loading categories...</option>
 </select>
 <label>Description</label>
-<input type="text" id="description" placeholder="What was this for?"/>
-<br/>
+<input type="text" id="description" placeholder="What was this for?" />
+<br />
 <button onclick="addExpense()">Add Expense</button>
 
-<hr/>
+<hr />
 
 <h2>This Month Summary</h2>
 <label>View month:</label>
-<input type="month" id="month-picker" style="width:auto;"/>
+<input type="month" id="month-picker" style="width:auto;" />
 <button onclick="loadSummary()">Load</button>
 <p>Total: <strong id="summary-total">—</strong></p>
 <p>Top category: <strong id="summary-top">—</strong></p>
 
 <table id="breakdown-table" style="display:none;">
-  <thead><tr><th>Category</th><th>Total ($)</th><th>% of Spending</th></tr></thead>
+  <thead>
+    <tr>
+      <th>Category</th>
+      <th>Total ($)</th>
+      <th>% of Spending</th>
+    </tr>
+  </thead>
   <tbody id="breakdown-body"></tbody>
 </table>
 {% endblock %}
@@ -45,7 +51,7 @@
   } else {
     // Default date to today, month to current
     document.getElementById('date').value = new Date().toISOString().split('T')[0];
-    document.getElementById('month-picker').value = new Date().toISOString().slice(0,7);
+    document.getElementById('month-picker').value = new Date().toISOString().slice(0, 7);
     loadCategories();
     loadSummary();
   }
@@ -68,9 +74,9 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        amount:      parseFloat(document.getElementById('amount').value),
-        date:        document.getElementById('date').value,
-        categoryID:  parseInt(document.getElementById('categoryID').value) || null,
+        amount: parseFloat(document.getElementById('amount').value),
+        date: document.getElementById('date').value,
+        categoryID: parseInt(document.getElementById('categoryID').value) || null,
         description: document.getElementById('description').value,
       })
     });

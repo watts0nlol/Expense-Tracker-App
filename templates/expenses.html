@@ -5,43 +5,51 @@
 
 <h2>Filter</h2>
 <label>Month</label>
-<input type="month" id="filter-month" style="width:auto;"/>
+<input type="month" id="filter-month" style="width:auto;" />
 <label>Category</label>
 <select id="filter-category" style="width:auto;">
   <option value="">All categories</option>
 </select>
-<br/>
+<br />
 <button onclick="loadExpenses()">Apply Filter</button>
 <button onclick="clearFilter()">Clear</button>
 <button onclick="exportCSV()">Export CSV</button>
 
-<hr/>
+<hr />
 
 <h2>Expense List</h2>
 <p id="expense-count"></p>
 <table>
   <thead>
-    <tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Actions</th></tr>
+    <tr>
+      <th>Date</th>
+      <th>Category</th>
+      <th>Description</th>
+      <th>Amount</th>
+      <th>Actions</th>
+    </tr>
   </thead>
   <tbody id="expenses-body">
-    <tr><td colspan="5">Loading...</td></tr>
+    <tr>
+      <td colspan="5">Loading...</td>
+    </tr>
   </tbody>
 </table>
 
-<hr/>
+<hr />
 
 <h2 id="edit-heading" style="display:none;">Edit Expense</h2>
 <div id="edit-form" style="display:none;">
-  <input type="hidden" id="edit-id"/>
+  <input type="hidden" id="edit-id" />
   <label>Amount ($)</label>
-  <input type="number" id="edit-amount" step="0.01"/>
+  <input type="number" id="edit-amount" step="0.01" />
   <label>Date</label>
-  <input type="date" id="edit-date"/>
+  <input type="date" id="edit-date" />
   <label>Category</label>
   <select id="edit-category"></select>
   <label>Description</label>
-  <input type="text" id="edit-description"/>
-  <br/>
+  <input type="text" id="edit-description" />
+  <br />
   <button onclick="saveEdit()">Save</button>
   <button onclick="cancelEdit()">Cancel</button>
 </div>
@@ -54,7 +62,7 @@
     document.querySelectorAll('h2, label, input, select, button, table, hr, p').forEach(el => el.style.display = 'none');
     document.querySelector('h1').insertAdjacentHTML('afterend', '<p>Please <a href="/login">log in</a> to view your expenses.</p>');
   } else {
-    document.getElementById('filter-month').value = new Date().toISOString().slice(0,7);
+    document.getElementById('filter-month').value = new Date().toISOString().slice(0, 7);
     loadCategories();
     loadExpenses();
   }
@@ -64,10 +72,10 @@
     if (!res.ok) return;
     const cats = await res.json();
     const filterSel = document.getElementById('filter-category');
-    const editSel   = document.getElementById('edit-category');
+    const editSel = document.getElementById('edit-category');
     cats.forEach(c => {
       filterSel.innerHTML += `<option value="${c.categoryID}">${c.name}</option>`;
-      editSel.innerHTML   += `<option value="${c.categoryID}">${c.name}</option>`;
+      editSel.innerHTML += `<option value="${c.categoryID}">${c.name}</option>`;
     });
   }
 
@@ -111,7 +119,7 @@
   }
 
   function clearFilter() {
-    document.getElementById('filter-month').value = new Date().toISOString().slice(0,7);
+    document.getElementById('filter-month').value = new Date().toISOString().slice(0, 7);
     document.getElementById('filter-category').value = '';
     loadExpenses();
   }
@@ -119,19 +127,19 @@
   function openEdit(expenseID) {
     const e = expenseCache[expenseID];
     if (!e) return;
-    document.getElementById('edit-id').value          = e.expenseID;
-    document.getElementById('edit-amount').value      = e.amount;
-    document.getElementById('edit-date').value        = e.date;
-    document.getElementById('edit-category').value    = e.categoryID || '';
+    document.getElementById('edit-id').value = e.expenseID;
+    document.getElementById('edit-amount').value = e.amount;
+    document.getElementById('edit-date').value = e.date;
+    document.getElementById('edit-category').value = e.categoryID || '';
     document.getElementById('edit-description').value = e.description || '';
     document.getElementById('edit-heading').style.display = 'block';
-    document.getElementById('edit-form').style.display    = 'block';
+    document.getElementById('edit-form').style.display = 'block';
     document.getElementById('edit-heading').scrollIntoView({ behavior: 'smooth' });
   }
 
   function cancelEdit() {
     document.getElementById('edit-heading').style.display = 'none';
-    document.getElementById('edit-form').style.display    = 'none';
+    document.getElementById('edit-form').style.display = 'none';
   }
 
   async function saveEdit() {
@@ -141,9 +149,9 @@
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        amount:      parseFloat(document.getElementById('edit-amount').value),
-        date:        document.getElementById('edit-date').value,
-        categoryID:  parseInt(document.getElementById('edit-category').value) || null,
+        amount: parseFloat(document.getElementById('edit-amount').value),
+        date: document.getElementById('edit-date').value,
+        categoryID: parseInt(document.getElementById('edit-category').value) || null,
         description: document.getElementById('edit-description').value,
       })
     });
