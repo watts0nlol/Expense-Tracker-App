@@ -3,7 +3,7 @@ from flask_login import UserMixin
 from datetime import datetime
 
 
-# ── User ──────────────────────────────────────────────────────────────────────
+
 class User(UserMixin, db.Model):
     __tablename__ = "users"
 
@@ -24,7 +24,6 @@ class User(UserMixin, db.Model):
         return f"<User {self.username}>"
 
 
-# ── UserProfile ───────────────────────────────────────────────────────────────
 class UserProfile(db.Model):
     __tablename__ = "user_profiles"
 
@@ -54,7 +53,6 @@ class UserProfile(db.Model):
         return f"<UserProfile {self.email}>"
 
 
-# ── Category ──────────────────────────────────────────────────────────────────
 class Category(db.Model):
     __tablename__ = "categories"
 
@@ -84,7 +82,6 @@ class Category(db.Model):
         return f"<Category {self.name}>"
 
 
-# ── Expense ───────────────────────────────────────────────────────────────────
 class Expense(db.Model):
     __tablename__ = "expenses"
 
@@ -130,7 +127,6 @@ class Expense(db.Model):
         return f"<Expense ${self.amount} on {self.date}>"
 
 
-# ── SpendingGoal ──────────────────────────────────────────────────────────────
 class SpendingGoal(db.Model):
     __tablename__ = "spending_goals"
 
@@ -174,7 +170,6 @@ class SpendingGoal(db.Model):
         return f"<SpendingGoal {self.month} ${self.amountLimit}>"
 
 
-# ── Reflection ────────────────────────────────────────────────────────────────
 class Reflection(db.Model):
     __tablename__ = "reflections"
 
@@ -205,7 +200,6 @@ class Reflection(db.Model):
         return f"<Reflection {self.month}>"
 
 
-# ── Notification ──────────────────────────────────────────────────────────────
 class Notification(db.Model):
     __tablename__ = "notifications"
 
@@ -237,12 +231,7 @@ class Notification(db.Model):
         return f"<Notification {self.alertID}>"
 
 
-# ── Analytics (stateless helper — not a DB table) ─────────────────────────────
 class Analytics:
-    """
-    Mirrors the Analytics class from the UML diagram.
-    Operates on a list of Expense objects passed in.
-    """
 
     def __init__(self, expenses: list):
         self.expenses    = expenses
@@ -266,11 +255,6 @@ class Analytics:
         return dict(sorted(trends.items()))
 
     def detectAnomalies(self, threshold: float = 1.5) -> list:
-        """
-        Flags categories where this month's spending exceeds
-        the user's historical average by the given multiplier threshold.
-        Returns a list of flag dicts.
-        """
         from collections import defaultdict
         monthly = defaultdict(lambda: defaultdict(float))
         for e in self.expenses:
@@ -309,13 +293,7 @@ class Analytics:
 
         return flags
 
-
-# ── Report (stateless helper — not a DB table) ────────────────────────────────
 class Report:
-    """
-    Mirrors the Report class from the UML diagram.
-    Generates CSV output from a list of Expense objects.
-    """
 
     def __init__(self, expenses: list, file_format: str = "csv"):
         self.expenses      = expenses
