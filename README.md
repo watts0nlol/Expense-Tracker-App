@@ -11,7 +11,7 @@ A web-based expense tracking application built with Flask and SQLite.
 
 ## Setup
 
-1. Clone the repository and navigate into the project folder.
+1. Clone the repository in VSCode or on whatever software you are using and go to the project folder.
 
 2. Install all dependencies by running: pip install -r requirements.txt
   
