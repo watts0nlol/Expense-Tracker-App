@@ -24,4 +24,4 @@ with app.app_context():
             cat = Category(name=cat_data["name"], colorCode=cat_data["colorCode"])
             db.session.add(cat)
     db.session.commit()
-    print("✅ Categories seeded successfully.")
+    print("Categories seeded successfully.")
