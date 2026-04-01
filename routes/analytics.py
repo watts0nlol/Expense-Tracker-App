@@ -25,7 +25,7 @@ def _expenses_for_month(uid: int, month: str) -> list:
     ).all()
 
 
-# ── Monthly Summary — spending totals + category breakdown ───────────────────
+#  Monthly Summary — spending totals + category breakdown 
 @analytics_bp.route("/summary", methods=["GET"])
 def monthly_summary():
     """
@@ -66,7 +66,7 @@ def monthly_summary():
     }), 200
 
 
-# ── Insights — highlights + month-over-month change ──────────────────────────
+#  Insights — highlights + month-over-month change 
 @analytics_bp.route("/insights", methods=["GET"])
 def insights():
     """
@@ -146,7 +146,7 @@ def insights():
     }), 200
 
 
-# ── Trends — monthly totals over time ────────────────────────────────────────
+#  Trends — monthly totals over time 
 @analytics_bp.route("/trends", methods=["GET"])
 def trends():
     """
@@ -162,7 +162,7 @@ def trends():
     return jsonify({"trends": analytics.calculateTrends()}), 200
 
 
-# ── Unusual Spending Detection ────────────────────────────────────────────────
+#  Unusual Spending Detection 
 @analytics_bp.route("/unusual", methods=["GET"])
 def unusual_spending():
     """
@@ -194,7 +194,7 @@ def unusual_spending():
     return jsonify({"flags": flags}), 200
 
 
-# ── Spending Goals ────────────────────────────────────────────────────────────
+#  Spending Goals 
 @analytics_bp.route("/goals", methods=["GET"])
 def get_goals():
     uid   = get_user_id()
@@ -252,7 +252,7 @@ def delete_goal(goal_id):
     return jsonify({"message": "Goal deleted"}), 200
 
 
-# ── Monthly Reflections ───────────────────────────────────────────────────────
+#  Monthly Reflections 
 @analytics_bp.route("/reflections", methods=["GET"])
 def get_reflections():
     uid   = get_user_id()
@@ -285,7 +285,7 @@ def save_reflection():
     return jsonify(reflection.to_dict()), 201
 
 
-# ── Notifications ─────────────────────────────────────────────────────────────
+#  Notifications 
 @analytics_bp.route("/notifications", methods=["GET"])
 def get_notifications():
     uid    = get_user_id()

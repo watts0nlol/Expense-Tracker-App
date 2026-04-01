@@ -7,7 +7,7 @@ from routes.utils import get_user_id
 expenses_bp = Blueprint("expenses", __name__)
 
 
-# ── Add Expense ───────────────────────────────────────────────────────────────
+#  Add Expense 
 @expenses_bp.route("/", methods=["POST"])
 def add_expense():
     uid = get_user_id()
@@ -49,7 +49,7 @@ def add_expense():
     return jsonify(expense.to_dict()), 201
 
 
-# ── Get Expenses (with optional filters) ─────────────────────────────────────
+#  Get Expenses (with optional filters) 
 @expenses_bp.route("/", methods=["GET"])
 def get_expenses():
     uid = get_user_id()
@@ -80,7 +80,7 @@ def get_expenses():
     return jsonify([e.to_dict() for e in expenses]), 200
 
 
-# ── Category Breakdown — spending per category ────────────────────────────────
+#  Category Breakdown — spending per category 
 @expenses_bp.route("/by-category", methods=["GET"])
 def by_category():
     """
@@ -124,7 +124,7 @@ def by_category():
     return jsonify(result), 200
 
 
-# ── Update Expense ────────────────────────────────────────────────────────────
+#  Update Expense 
 @expenses_bp.route("/<int:expense_id>", methods=["PUT"])
 def update_expense(expense_id):
     uid = get_user_id()
@@ -162,7 +162,7 @@ def update_expense(expense_id):
     return jsonify(expense.to_dict()), 200
 
 
-# ── Delete Expense ────────────────────────────────────────────────────────────
+#  Delete Expense 
 @expenses_bp.route("/<int:expense_id>", methods=["DELETE"])
 def delete_expense(expense_id):
     uid = get_user_id()
@@ -175,7 +175,7 @@ def delete_expense(expense_id):
     return jsonify({"message": "Expense deleted"}), 200
 
 
-# ── Export CSV ────────────────────────────────────────────────────────────────
+#  Export CSV 
 # NOTE: This route must stay BELOW the /<int:expense_id> routes so Flask
 # does not try to parse "export" as an integer ID.
 @expenses_bp.route("/export", methods=["GET"])
@@ -202,7 +202,7 @@ def export_csv():
     return report.download()
 
 
-# ── Get All Categories ────────────────────────────────────────────────────────
+#  Get All Categories 
 @expenses_bp.route("/categories", methods=["GET"])
 def get_categories():
     categories = Category.query.all()
