@@ -1,6 +1,6 @@
 """
 Run this once after app.py to seed the default categories into the database.
-  python seed_categories.py this is a test
+  python seed_categories.py
 """
 from app import app
 from database import db
