@@ -33,7 +33,7 @@ Go to http://127.0.0.1:5000/register and create an account, then log in at /logi
 - /analytics-page — Spending insights, trends, goals, reflections, and unusual spending detection
 - /login — Log in to your account
 - /register — Create a new account
-- /logout-page — Log out
+- /logout — Log out
 
 
 ## Notes
