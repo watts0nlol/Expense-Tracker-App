@@ -6,7 +6,6 @@ from routes.utils import get_user_id
 
 analytics_bp = Blueprint("analytics", __name__)
 
-
 def _get_prev_month(month: str) -> str:
     """Returns the previous month string given a YYYY-MM string."""
     year, mon = map(int, month.split("-"))
@@ -25,7 +24,7 @@ def _expenses_for_month(uid: int, month: str) -> list:
     ).all()
 
 
-#  Monthly Summary — spending totals + category breakdown 
+#  Monthly Summary (spending totals + category breakdown)
 @analytics_bp.route("/summary", methods=["GET"])
 def monthly_summary():
     """
