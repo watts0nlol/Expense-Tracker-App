@@ -1,7 +1,6 @@
 # Personal Expense Tracker
 
-A web-based expense tracking application built with Flask and SQLite.
-
+Our web-based expense tracking application built with Flask and SQLite. It is designed to make sure you are keep tracking of where your money is going!
 
 ## Requirements
 
@@ -21,10 +20,13 @@ A web-based expense tracking application built with Flask and SQLite.
 
 5. Open your browser and go to: http://127.0.0.1:5000
 
+6. Register / Log in in the login page
+
+7. Start tracking your spending! Everything is ready to go.
+
 ## First Use
 
 Go to http://127.0.0.1:5000/register and create an account, then log in at /login. From there you can start adding expenses on the Dashboard.
-
 
 ## Pages
 
@@ -34,7 +36,6 @@ Go to http://127.0.0.1:5000/register and create an account, then log in at /logi
 - /login — Log in to your account
 - /register — Create a new account
 - /logout — Log out
-
 
 ## Notes
 
