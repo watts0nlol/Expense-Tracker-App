@@ -7,7 +7,6 @@ Our web-based expense tracking application built with Flask and SQLite. It is de
 - Python 3.9 or higher
 - pip
 
-
 ## Setup
 
 1. Clone the repository in VSCode or on whatever software you are using and go to the project folder.
