@@ -3,136 +3,192 @@
 {% block content %}
 <h1>Analytics & Insights</h1>
 
-<!-- Monthly Summary -->
-<h2>Monthly Summary</h2>
-<label>Month</label>
-<input type="month" id="summary-month" style="width:auto;" />
-<button onclick="loadSummary()">Load</button>
-<p>Total spent: <strong id="summary-total">-</strong></p>
-<p>Top category: <strong id="summary-top">-</strong></p>
-<table id="summary-table" style="display:none;">
-  <thead>
-    <tr>
-      <th>Category</th>
-      <th>Total ($)</th>
-      <th>%</th>
-    </tr>
-  </thead>
-  <tbody id="summary-body"></tbody>
-</table>
+<style>
+  .section {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+    background: #fff;
+  }
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    user-select: none;
+    background: #f7f6f2;
+    border-radius: 6px;
+  }
+  .section-header:hover { background: #eef0ec; }
+  .section-header h2 {
+    margin: 0;
+    font-size: 1rem;
+    color: #1a1a1a;
+  }
+  .section-arrow {
+    font-size: 0.85rem;
+    color: #888;
+    transition: transform 0.2s;
+  }
+  .section-arrow.open { transform: rotate(180deg); }
+  .section-body {
+    display: none;
+    padding: 1rem;
+    border-top: 1px solid #eee;
+  }
+  .section-body.open { display: block; }
+  .badge-unread {
+    background: #c0392b;
+    color: #fff;
+    font-size: 0.7rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 99px;
+    margin-left: 0.5rem;
+    font-weight: 600;
+  }
+</style>
 
-<hr />
+<!-- 1. Notifications -->
+<div class="section">
+  <div class="section-header" onclick="toggleSection('notifications')">
+    <h2>🔔 Notifications 
+      <span title="Alerts generated when unusual spending is detected. Unread notifications appear in bold.">ℹ️</span>
+      <span id="notif-badge" style="display:none;" class="badge-unread"></span></h2>
+    <span class="section-arrow" id="arrow-notifications">▼</span>
+  </div>
+  <div class="section-body" id="body-notifications">
+    <ul id="notifications-list"><li>Loading...</li></ul>
+  </div>
+</div>
 
-<!-- Month-over-Month Comparison -->
-<h2>Month-over-Month Comparison</h2>
-<label>Compare month</label>
-<input type="month" id="compare-month" style="width:auto;" />
-<button onclick="loadComparison()">Compare</button>
-<table id="compare-table" style="display:none;">
-  <thead>
-    <tr>
-      <th>Category</th>
-      <th>Last Month ($)</th>
-      <th>This Month ($)</th>
-      <th>Change ($)</th>
-    </tr>
-  </thead>
-  <tbody id="compare-body"></tbody>
-</table>
+<!-- 2. Summary -->
+<div class="section">
+  <div class="section-header" onclick="toggleSection('summary')">
+    <h2>📊 Monthly Summary <span title="Shows your total spending and category breakdown for the selected month.">ℹ️</span></h2>
+    <span class="section-arrow" id="arrow-summary">▼</span>
+  </div>
+  <div class="section-body" id="body-summary">
+    <label>Month</label>
+    <input type="month" id="summary-month" style="width:auto;"/>
+    <button onclick="loadSummary()">Load</button>
+    <p>Total spent: <strong id="summary-total">-</strong></p>
+    <p>Top category: <strong id="summary-top">-</strong></p>
+    <table id="summary-table" style="display:none;">
+      <thead><tr><th>Category</th><th>Total ($)</th><th>%</th></tr></thead>
+      <tbody id="summary-body"></tbody>
+    </table>
+  </div>
+</div>
 
-<hr />
+<!-- 3. Month-over-Month Comparison -->
+<div class="section">
+  <div class="section-header" onclick="toggleSection('comparison')">
+    <h2>📅 Month-over-Month Comparison
+      <span title="Compares your spending per category between the selected month and the month before it. Red means you spent more, green means less.">ℹ️</span></h2>
+    <span class="section-arrow" id="arrow-comparison">▼</span>
+  </div>
+  <div class="section-body" id="body-comparison">
+    <label>Compare month</label>
+    <input type="month" id="compare-month" style="width:auto;"/>
+    <button onclick="loadComparison()">Compare</button>
+    <table id="compare-table" style="display:none;">
+      <thead><tr><th>Category</th><th>Last Month ($)</th><th>This Month ($)</th><th>Change ($)</th></tr></thead>
+      <tbody id="compare-body"></tbody>
+    </table>
+  </div>
+</div>
 
-<!-- Unusual Spending -->
-<h2>Unusual Spending Detection</h2>
-<p>
-  This automatically compares your spending per category this month against your historical average.
-  If any category is <strong>50% or more above your usual average</strong>, it gets flagged here.
-</p>
-<p>
-  <strong>Requirements:</strong> You need at least 2 months of recorded expenses for a category before it can be
-  compared.
-  The more months of data you have, the more accurate the detection becomes.
-</p>
-<p>
-  <strong>No setup needed</strong> - just record your expenses regularly and check back here each month.
-  Any notifications generated are also saved under the Notifications section below.
-</p>
-<br />
-<button onclick="loadUnusual()">Check for Unusual Spending</button>
-<div id="unusual-result"></div>
+<!-- 4. Unusual Spending -->
+<div class="section">
+  <div class="section-header" onclick="toggleSection('unusual')">
+    <h2>⚠️ Unusual Spending Detection
+      <span title="Set a dollar limit per category per month. One goal per category per month — setting it again overwrites the existing one.">ℹ️</span></h2>
+    <span class="section-arrow" id="arrow-unusual">▼</span>
+  </div>
+  <div class="section-body" id="body-unusual">
+    <p>Automatically compares your spending per category this month against your historical average.
+    If any category is <strong>50% or more above your usual average</strong>, it gets flagged here.</p>
+    <p><strong>Requirements:</strong> At least 2 months of recorded expenses per category.
+    <strong>No setup needed</strong> - just record expenses regularly.</p>
+    <br/>
+    <button onclick="loadUnusual()">Check for Unusual Spending</button>
+    <div id="unusual-result"></div>
+  </div>
+</div>
 
-<hr />
+<!-- 5. Goals -->
+<div class="section">
+  <div class="section-header" onclick="toggleSection('goals')">
+    <h2>🎯 Spending Goals
+      <span title="Set a dollar limit per category per month. One goal per category per month — setting it again overwrites the existing one.">ℹ️</span></h2>
+    <span class="section-arrow" id="arrow-goals">▼</span>
+  </div>
+  <div class="section-body" id="body-goals">
+    <p>Set a spending limit per category per month. To update a limit just set it again - it overwrites the existing one.</p>
+    <label>View goals for month:</label>
+    <input type="month" id="goal-month" style="width:auto;"/>
+    <button onclick="loadGoals()">Load Goals</button>
+    <table id="goals-table" style="display:none;">
+      <thead><tr><th>Category</th><th>Limit ($)</th><th>Spent ($)</th><th>Remaining ($)</th><th>Actions</th></tr></thead>
+      <tbody id="goals-body"></tbody>
+    </table>
+    <h3 style="margin-top:1rem;">Set a Goal</h3>
+    <label>Month</label>
+    <input type="month" id="new-goal-month" style="width:auto;"/>
+    <label>Category</label>
+    <select id="new-goal-category">
+      <option value="">Loading...</option>
+    </select>
+    <label>Amount Limit ($)</label>
+    <input type="number" id="new-goal-amount" step="0.01" placeholder="e.g. 200"/>
+    <br/>
+    <button onclick="setGoal()">Set Goal</button>
+  </div>
+</div>
 
-<!-- Spending Goals -->
-<h2>Spending Goals</h2>
-<p>
-  Set a spending limit for a category in a given month. The tracker will show how much you have spent
-  versus your limit so you can stay on track.
-</p>
-<p>
-  <strong>How to set one up:</strong> Choose a month, pick a category (e.g. Food & Dining), enter a dollar limit,
-  and click Set Goal. You can set one goal per category per month. To update a limit just set it again -
-  it will overwrite the existing one.
-</p>
-<label>View goals for month:</label>
-<input type="month" id="goal-month" style="width:auto;" />
-<button onclick="loadGoals()">Load Goals</button>
-<table id="goals-table" style="display:none;">
-  <thead>
-    <tr>
-      <th>Category</th>
-      <th>Limit ($)</th>
-      <th>Spent ($)</th>
-      <th>Remaining ($)</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody id="goals-body"></tbody>
-</table>
-
-<h3>Set a Goal</h3>
-<label>Month</label>
-<input type="month" id="new-goal-month" style="width:auto;" />
-<label>Category</label>
-<select id="new-goal-category">
-  <option value="">Loading...</option>
-</select>
-<label>Amount Limit ($)</label>
-<input type="number" id="new-goal-amount" step="0.01" placeholder="e.g. 200" />
-<br />
-<button onclick="setGoal()">Set Goal</button>
-
-<hr />
-
-<!-- Monthly Reflection -->
-<h2>Monthly Reflection</h2>
-<label>Month</label>
-<input type="month" id="reflection-month" style="width:auto;" />
-<button onclick="loadReflection()">Load</button>
-<br /><br />
-<textarea id="reflection-content" rows="4" placeholder="Write your monthly spending reflection here..."></textarea>
-<br />
-<button onclick="saveReflection()">Save Reflection</button>
-
-<hr />
-
-<!-- Notifications -->
-<h2>Notifications</h2>
-<button onclick="loadNotifications()">Load Notifications</button>
-<ul id="notifications-list"></ul>
+<!-- 6. Reflections -->
+<div class="section">
+  <div class="section-header" onclick="toggleSection('reflections')">
+    <h2>📝 Monthly Reflection
+      <span title="Write a short note about your spending habits for the month. One reflection per month, saved automatically when you click Save.">ℹ️</span></h2>
+    <span class="section-arrow" id="arrow-reflections">▼</span>
+  </div>
+  <div class="section-body" id="body-reflections">
+    <label>Month</label>
+    <input type="month" id="reflection-month" style="width:auto;"/>
+    <button onclick="loadReflection()">Load</button>
+    <br/><br/>
+    <textarea id="reflection-content" rows="4" placeholder="Write your monthly spending reflection here..."></textarea>
+    <br/>
+    <button onclick="saveReflection()">Save Reflection</button>
+  </div>
+</div>
 
 {% endblock %}
 
 {% block scripts %}
 <script>
-  const today = new Date().toISOString().slice(0, 7);
-  document.getElementById('summary-month').value = today;
-  document.getElementById('compare-month').value = today;
-  document.getElementById('goal-month').value = today;
-  document.getElementById('new-goal-month').value = today;
+  const today = new Date().toISOString().slice(0,7);
+  document.getElementById('summary-month').value    = today;
+  document.getElementById('compare-month').value    = today;
+  document.getElementById('goal-month').value       = today;
+  document.getElementById('new-goal-month').value   = today;
   document.getElementById('reflection-month').value = today;
 
-  // Load categories for goal dropdown
+  //  Collapsible section toggle 
+  function toggleSection(name) {
+    const body  = document.getElementById('body-' + name);
+    const arrow = document.getElementById('arrow-' + name);
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    arrow.classList.toggle('open', !isOpen);
+  }
+
+  // Open notifications by default on load
+  toggleSection('notifications');
+
+  //  Categories 
   async function loadCategories() {
     const res = await fetch('/expenses/categories');
     if (!res.ok) return;
@@ -142,12 +198,46 @@
     cats.forEach(c => sel.innerHTML += `<option value="${c.categoryID}">${c.name}</option>`);
   }
 
-  //  Monthly Summary 
+  //  Notifications ─
+  async function loadNotifications() {
+    const res    = await fetch('/analytics/notifications');
+    const notifs = await res.json();
+    const list   = document.getElementById('notifications-list');
+    const badge  = document.getElementById('notif-badge');
+
+    const unread = notifs.filter(n => !n.isRead).length;
+    if (unread > 0) {
+      badge.textContent = unread;
+      badge.style.display = 'inline';
+    } else {
+      badge.style.display = 'none';
+    }
+
+    if (!notifs.length) {
+      list.innerHTML = '<li>No notifications.</li>';
+      return;
+    }
+
+    list.innerHTML = notifs.map(n => `
+      <li style="margin-bottom:0.5rem;">
+        ${!n.isRead ? '<strong>' : ''}${n.message}${!n.isRead ? '</strong>' : ''}
+        - <small style="color:#888;">${n.timestamp}</small>
+        ${!n.isRead ? `<button onclick="markRead(${n.alertID})" style="margin-left:0.5rem;">Mark as read</button>` : ''}
+      </li>
+    `).join('');
+  }
+
+  async function markRead(id) {
+    await fetch(`/analytics/notifications/${id}/read`, { method: 'PUT' });
+    loadNotifications();
+  }
+
+  //  Monthly Summary
   async function loadSummary() {
     clearMsgs();
     const month = document.getElementById('summary-month').value;
-    const res = await fetch(`/analytics/summary?month=${month}`);
-    const data = await res.json();
+    const res   = await fetch(`/analytics/summary?month=${month}`);
+    const data  = await res.json();
 
     document.getElementById('summary-total').textContent = '$' + (data.total || 0).toFixed(2);
 
@@ -166,9 +256,9 @@
   //  Month Comparison 
   async function loadComparison() {
     clearMsgs();
-    const month = document.getElementById('compare-month').value;
-    const [y, m] = month.split('-').map(Number);
-    const prevMonth = m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, '0')}`;
+    const month     = document.getElementById('compare-month').value;
+    const [y, m]    = month.split('-').map(Number);
+    const prevMonth = m === 1 ? `${y-1}-12` : `${y}-${String(m-1).padStart(2,'0')}`;
 
     const [curr, prev] = await Promise.all([
       fetch(`/analytics/summary?month=${month}`).then(r => r.json()),
@@ -186,10 +276,16 @@
     }
 
     document.getElementById('compare-body').innerHTML = allCats.map(cat => {
-      const c = curr.breakdown?.find(b => b.category === cat)?.total ?? 0;
-      const p = prev.breakdown?.find(b => b.category === cat)?.total ?? 0;
+      const c    = curr.breakdown?.find(b => b.category === cat)?.total ?? 0;
+      const p    = prev.breakdown?.find(b => b.category === cat)?.total ?? 0;
       const diff = (c - p).toFixed(2);
-      return `<tr><td>${cat}</td><td>$${p.toFixed(2)}</td><td>$${c.toFixed(2)}</td><td>${diff >= 0 ? '+' : ''}$${diff}</td></tr>`;
+      const color = diff > 0 ? 'color:#c0392b;' : diff < 0 ? 'color:#2d6a4f;' : '';
+      return `<tr>
+        <td>${cat}</td>
+        <td>$${p.toFixed(2)}</td>
+        <td>$${c.toFixed(2)}</td>
+        <td style="${color}">${diff >= 0 ? '+' : ''}$${diff}</td>
+      </tr>`;
     }).join('');
     document.getElementById('compare-table').style.display = 'table';
   }
@@ -200,8 +296,6 @@
     const el = document.getElementById('unusual-result');
     el.innerHTML = '<p>Checking...</p>';
 
-    // Also fetch summary for current month to understand data context
-    const today = new Date().toISOString().slice(0, 7);
     const [unusualRes, summaryRes, trendsRes] = await Promise.all([
       fetch('/analytics/unusual'),
       fetch(`/analytics/summary?month=${today}`),
@@ -210,66 +304,52 @@
 
     const unusual = await unusualRes.json();
     const summary = await summaryRes.json();
-    const trends = await trendsRes.json();
+    const trends  = await trendsRes.json();
 
-    const flags = unusual.flags || [];
+    const flags        = unusual.flags || [];
     const monthsOfData = Object.keys(trends.trends || {}).length;
     const hasThisMonth = summary.total > 0;
-    const breakdown = summary.breakdown || [];
+    const breakdown    = summary.breakdown || [];
 
-    //  Case 1: Real flags found - show them 
     if (flags.length > 0) {
       el.innerHTML =
         '<p style="color:orange;"><strong>⚠ Unusual spending detected:</strong></p><ul>' +
         flags.map(f =>
-          `<li><strong>${f.category}</strong>: $${f.current} this month vs your average of $${f.average} - that is ${f.percent_over}% above normal.</li>`
-        ).join('') +
-        '</ul>' +
+          `<li><strong>${f.category}</strong>: $${f.current} this month vs your average of $${f.average} - ${f.percent_over}% above normal.</li>`
+        ).join('') + '</ul>' +
         '<p>Consider reviewing these categories and setting a spending goal to stay on track.</p>';
-
-      //  Case 2: Not enough history yet (less than 2 months of data) 
     } else if (monthsOfData < 2) {
       el.innerHTML =
         '<p><strong>Not enough data yet.</strong></p>' +
-        '<p>Unusual spending detection needs at least <strong>2 months</strong> of recorded expenses to compare against. ' +
-        'Keep logging your expenses and check back next month.</p>' +
-        '<p style="color:gray;"><em>Tip: You can backdate expenses using the date field on the dashboard to build up history faster.</em></p>';
-
-      //  Case 3: Has history, has this month's data, nothing flagged 
+        '<p>Unusual spending detection needs at least <strong>2 months</strong> of recorded expenses. ' +
+        'Keep logging and check back next month.</p>' +
+        '<p style="color:gray;"><em>Tip: You can backdate expenses using the date field to build up history faster.</em></p>';
     } else if (monthsOfData >= 2 && hasThisMonth) {
       const topCat = breakdown.length > 0 ? breakdown[0].category : null;
       el.innerHTML =
         '<p style="color:green;"><strong>✓ No unusual spending detected this month.</strong></p>' +
-        '<p>Your spending looks consistent with your historical patterns across all categories.</p>' +
-        (topCat
-          ? `<p>Your highest category this month is <strong>${topCat}</strong> at <strong>$${breakdown[0].total.toFixed(2)}</strong> - keep an eye on it if it tends to spike.</p>`
-          : '') +
-        '<p style="color:gray;"><em>The threshold is set to flag anything 50% above your usual average. ' +
-        'If you want to be more proactive, try setting a spending goal for your top categories.</em></p>';
-
-      //  Case 4: Has history but no expenses recorded this month yet 
+        '<p>Your spending looks consistent with your historical patterns.</p>' +
+        (topCat ? `<p>Highest category: <strong>${topCat}</strong> at <strong>$${breakdown[0].total.toFixed(2)}</strong>.</p>` : '') +
+        '<p style="color:gray;"><em>Threshold is 50% above your usual average.</em></p>';
     } else if (monthsOfData >= 2 && !hasThisMonth) {
       el.innerHTML =
         '<p><strong>No expenses recorded for this month yet.</strong></p>' +
-        '<p>Start logging your expenses on the dashboard and come back here to check for unusual patterns.</p>' +
-        '<p style="color:gray;"><em>You have ' + monthsOfData + ' month(s) of history on record - ' +
-        'detection will run automatically once you have some entries for this month.</em></p>';
-
-      //  Case 5: Fallback - no data at all 
+        `<p>You have ${monthsOfData} month(s) of history - detection runs once you log expenses this month.</p>`;
     } else {
       el.innerHTML =
         '<p><strong>No expense data found.</strong></p>' +
-        '<p>Head to the <a href="/dashboard">dashboard</a> to start recording your expenses. ' +
-        'Once you have a couple months of data this section will automatically flag any categories ' +
-        'where you are spending significantly more than usual.</p>';
+        '<p>Head to <a href="/expenses-page">Expenses</a> to start recording.</p>';
     }
+
+    // Also refresh notifications in case new flags were just created
+    loadNotifications();
   }
 
   //  Spending Goals 
   async function loadGoals() {
     clearMsgs();
     const month = document.getElementById('goal-month').value;
-    const res = await fetch(`/analytics/goals?month=${month}`);
+    const res   = await fetch(`/analytics/goals?month=${month}`);
     const goals = await res.json();
 
     if (!goals.length) {
@@ -296,18 +376,14 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        month: document.getElementById('new-goal-month').value,
-        categoryID: parseInt(document.getElementById('new-goal-category').value) || null,
+        month:       document.getElementById('new-goal-month').value,
+        categoryID:  parseInt(document.getElementById('new-goal-category').value) || null,
         amountLimit: parseFloat(document.getElementById('new-goal-amount').value),
       })
     });
     const data = await res.json();
-    if (res.ok) {
-      showMsg('Goal saved.');
-      loadGoals();
-    } else {
-      showErr(data.error);
-    }
+    if (res.ok) { showMsg('Goal saved.'); loadGoals(); }
+    else showErr(data.error);
   }
 
   async function deleteGoal(id) {
@@ -316,12 +392,12 @@
     if (res.ok) { showMsg('Goal deleted.'); loadGoals(); }
   }
 
-  //  Reflections 
+  //  Reflections ─
   async function loadReflection() {
     clearMsgs();
     const month = document.getElementById('reflection-month').value;
-    const res = await fetch(`/analytics/reflections?month=${month}`);
-    const data = await res.json();
+    const res   = await fetch(`/analytics/reflections?month=${month}`);
+    const data  = await res.json();
     document.getElementById('reflection-content').value =
       data.length > 0 ? data[0].content : '';
   }
@@ -332,7 +408,7 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        month: document.getElementById('reflection-month').value,
+        month:   document.getElementById('reflection-month').value,
         content: document.getElementById('reflection-content').value,
       })
     });
@@ -341,32 +417,8 @@
     else showErr(data.error);
   }
 
-  //  Notifications 
-  async function loadNotifications() {
-    clearMsgs();
-    const res = await fetch('/analytics/notifications');
-    const notifs = await res.json();
-    const list = document.getElementById('notifications-list');
-
-    if (!notifs.length) {
-      list.innerHTML = '<li>No notifications.</li>';
-      return;
-    }
-
-    list.innerHTML = notifs.map(n => `
-      <li>
-        ${n.isRead ? '' : '<strong>'} ${n.message} - <small>${n.timestamp}</small> ${n.isRead ? '' : '</strong>'}
-        ${!n.isRead ? `<button onclick="markRead(${n.alertID})">Mark as read</button>` : ''}
-      </li>
-    `).join('');
-  }
-
-  async function markRead(id) {
-    await fetch(`/analytics/notifications/${id}/read`, { method: 'PUT' });
-    loadNotifications();
-  }
-
+  // Load on page open
   loadCategories();
-  loadSummary();
+  loadNotifications();
 </script>
 {% endblock %}

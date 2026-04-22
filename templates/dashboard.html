@@ -3,19 +3,21 @@
 {% block content %}
 <h1>Dashboard</h1>
 
-<h2>Add Expense</h2>
-<label>Amount ($)</label>
-<input type="number" id="amount" placeholder="0.00" min="0" step="0.01"/>
-<label>Date</label>
-<input type="date" id="date"/>
-<label>Category</label>
-<select id="categoryID">
-  <option value="">Loading categories...</option>
-</select>
-<label>Description</label>
-<input type="text" id="description" placeholder="What was this for?"/>
-<br/>
-<button onclick="addExpense()">Add Expense</button>
+<!-- Spending Goals at top -->
+<h2>Spending Goals - This Month</h2>
+<p id="goals-intro" style="color:#888;font-size:0.875rem;">Loading goals...</p>
+
+<div style="display:flex;gap:2rem;align-items:flex-start;flex-wrap:wrap;">
+  <!-- Pie chart -->
+  <div id="chart-container" style="display:none;flex-shrink:0;">
+    <canvas id="spending-pie" width="220" height="220"></canvas>
+    <div id="pie-legend" style="margin-top:0.75rem;font-size:0.8rem;"></div>
+  </div>
+  <!-- Progress bars -->
+  <div id="goals-list" style="flex:1;min-width:260px;"></div>
+</div>
+
+<p><a href="/analytics-page">Set or manage goals →</a></p>
 
 <hr/>
 
@@ -23,80 +25,43 @@
 <label>View month:</label>
 <input type="month" id="month-picker" style="width:auto;"/>
 <button onclick="loadSummary()">Load</button>
-<p>Total: <strong id="summary-total">—</strong></p>
-<p>Top category: <strong id="summary-top">—</strong></p>
+<p>Total: <strong id="summary-total">-</strong></p>
+<p>Top category: <strong id="summary-top">-</strong></p>
 
 <table id="breakdown-table" style="display:none;">
   <thead><tr><th>Category</th><th>Total ($)</th><th>% of Spending</th></tr></thead>
   <tbody id="breakdown-body"></tbody>
 </table>
 
-<hr/>
-
-<h2>Spending Goals</h2>
-<p id="goals-intro" style="color:#888;font-size:0.875rem;">Loading goals for this month...</p>
-<div id="goals-list"></div>
-<p><a href="/analytics-page">Set or manage goals →</a></p>
-
 {% endblock %}
 
 {% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
   // Block page if not logged in
   if (!localStorage.getItem('username')) {
-    document.querySelector('h1').textContent = 'Dashboard';
-    document.getElementById('message') && (document.getElementById('message').textContent = '');
-    document.querySelectorAll('h2, label, input, select, button, table, hr, p').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('h2, label, input, select, button, table, hr, p, div').forEach(el => el.style.display = 'none');
     document.querySelector('h1').insertAdjacentHTML('afterend', '<p>Please <a href="/login">log in</a> to view your dashboard.</p>');
   } else {
-    document.getElementById('date').value = new Date().toISOString().split('T')[0];
     document.getElementById('month-picker').value = new Date().toISOString().slice(0,7);
-    loadCategories();
     loadSummary();
     loadGoals();
   }
 
-  async function loadCategories() {
-    const res = await fetch('/expenses/categories');
-    if (!res.ok) return;
-    const cats = await res.json();
-    const sel = document.getElementById('categoryID');
-    sel.innerHTML = '<option value="">Select category...</option>';
-    cats.forEach(c => {
-      sel.innerHTML += `<option value="${c.categoryID}">${c.name}</option>`;
-    });
-  }
+  // Pie chart instance - kept so we can destroy and redraw on refresh
+  let pieChart = null;
 
-  async function addExpense() {
-    clearMsgs();
-    const res = await fetch('/expenses/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        amount:      parseFloat(document.getElementById('amount').value),
-        date:        document.getElementById('date').value,
-        categoryID:  parseInt(document.getElementById('categoryID').value) || null,
-        description: document.getElementById('description').value,
-      })
-    });
-    const data = await res.json();
-    if (res.ok) {
-      showMsg('Expense added successfully.');
-      document.getElementById('amount').value = '';
-      document.getElementById('description').value = '';
-      document.getElementById('categoryID').value = '';
-      loadSummary();
-      loadGoals();
-    } else {
-      showErr(data.error);
-    }
-  }
+  // Palette for pie slices - cycles if more categories than colours
+  const PALETTE = [
+    '#2d6a4f','#52b788','#f4a261','#e76f51','#457b9d',
+    '#a8dadc','#e63946','#6d6875','#f1c40f','#2a9d8f'
+  ];
 
   async function loadSummary() {
     clearMsgs();
     const month = document.getElementById('month-picker').value;
-    const res = await fetch(`/analytics/summary?month=${month}`);
-    const data = await res.json();
+    const res   = await fetch(`/analytics/summary?month=${month}`);
+    const data  = await res.json();
 
     document.getElementById('summary-total').textContent = '$' + (data.total || 0).toFixed(2);
 
@@ -109,42 +74,43 @@
       ).join('');
       document.getElementById('breakdown-table').style.display = 'table';
     } else {
-      document.getElementById('summary-top').textContent = '—';
+      document.getElementById('summary-top').textContent = '-';
       document.getElementById('breakdown-table').style.display = 'none';
     }
   }
 
   async function loadGoals() {
-    const month = new Date().toISOString().slice(0, 7);
-    const res   = await fetch(`/analytics/goals?month=${month}`);
-    const goals = await res.json();
-
-    const intro   = document.getElementById('goals-intro');
+    const month     = new Date().toISOString().slice(0, 7);
+    const intro     = document.getElementById('goals-intro');
     const container = document.getElementById('goals-list');
+
+    // Fetch goals and current month spending breakdown together
+    const [goalsRes, summaryRes] = await Promise.all([
+      fetch(`/analytics/goals?month=${month}`),
+      fetch(`/analytics/summary?month=${month}`),
+    ]);
+    const goals   = await goalsRes.json();
+    const summary = await summaryRes.json();
 
     if (!goals.length) {
       intro.textContent = 'No spending goals set for this month. Set one on the Analytics page.';
       container.innerHTML = '';
+      document.getElementById('chart-container').style.display = 'none';
       return;
     }
 
-    intro.textContent = `${goals.length} goal(s) for ${month}:`;
+    intro.textContent = `${goals.length} goal(s) for ${month}`;
+
+    // ── Progress bars ────────────────────────────────────────────────────────
     container.innerHTML = goals.map(g => {
-      const pct     = g.amountLimit > 0 ? Math.min((g.spent / g.amountLimit) * 100, 100) : 0;
-      const over    = g.spent > g.amountLimit;
-      const warn    = pct >= 80 && !over;
-
-      // Bar colour logic:
-      // - Red if over limit
-      // - Yellow if 80–99%
-      // - Green otherwise
+      const pct      = g.amountLimit > 0 ? Math.min((g.spent / g.amountLimit) * 100, 100) : 0;
+      const over     = g.spent > g.amountLimit;
+      const warn     = pct >= 80 && !over;
       const barColor = over ? '#c0392b' : warn ? '#e6a817' : '#2d6a4f';
-
-      // Status label
-      const status = over
+      const status   = over
         ? `<span style="color:#c0392b;font-weight:600;">Over limit by $${(g.spent - g.amountLimit).toFixed(2)}</span>`
         : warn
-        ? `<span style="color:#e6a817;font-weight:600;">Approaching limit — $${g.remaining.toFixed(2)} left</span>`
+        ? `<span style="color:#e6a817;font-weight:600;">Approaching limit - $${g.remaining.toFixed(2)} left</span>`
         : `<span style="color:#2d6a4f;">$${g.remaining.toFixed(2)} remaining</span>`;
 
       return `
@@ -160,6 +126,57 @@
         </div>
       `;
     }).join('');
+
+    // ── Pie chart - spending per category this month ─────────────────────────
+    const breakdown = summary.breakdown || [];
+
+    if (breakdown.length > 0) {
+      document.getElementById('chart-container').style.display = 'block';
+
+      const labels = breakdown.map(b => b.category);
+      const values = breakdown.map(b => b.total);
+      const colors = labels.map((_, i) => PALETTE[i % PALETTE.length]);
+
+      // Destroy previous chart instance before redrawing
+      if (pieChart) {
+        pieChart.destroy();
+        pieChart = null;
+      }
+
+      const ctx = document.getElementById('spending-pie').getContext('2d');
+      pieChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels,
+          datasets: [{
+            data:            values,
+            backgroundColor: colors,
+            borderColor:     '#fff',
+            borderWidth:     2,
+          }]
+        },
+        options: {
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => ` ${ctx.label}: $${ctx.parsed.toFixed(2)}`
+              }
+            }
+          }
+        }
+      });
+
+      // Custom legend below chart
+      document.getElementById('pie-legend').innerHTML = labels.map((label, i) => `
+        <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.3rem;">
+          <div style="width:12px;height:12px;border-radius:2px;background:${colors[i]};flex-shrink:0;"></div>
+          <span>${label} - $${values[i].toFixed(2)}</span>
+        </div>
+      `).join('');
+    } else {
+      document.getElementById('chart-container').style.display = 'none';
+    }
   }
 </script>
 {% endblock %}
