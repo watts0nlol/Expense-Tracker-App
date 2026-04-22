@@ -8,8 +8,8 @@
 <label>Month</label>
 <input type="month" id="summary-month" style="width:auto;" />
 <button onclick="loadSummary()">Load</button>
-<p>Total spent: <strong id="summary-total">—</strong></p>
-<p>Top category: <strong id="summary-top">—</strong></p>
+<p>Total spent: <strong id="summary-total">-</strong></p>
+<p>Top category: <strong id="summary-top">-</strong></p>
 <table id="summary-table" style="display:none;">
   <thead>
     <tr>
@@ -54,7 +54,7 @@
   The more months of data you have, the more accurate the detection becomes.
 </p>
 <p>
-  <strong>No setup needed</strong> — just record your expenses regularly and check back here each month.
+  <strong>No setup needed</strong> - just record your expenses regularly and check back here each month.
   Any notifications generated are also saved under the Notifications section below.
 </p>
 <br />
@@ -71,7 +71,7 @@
 </p>
 <p>
   <strong>How to set one up:</strong> Choose a month, pick a category (e.g. Food & Dining), enter a dollar limit,
-  and click Set Goal. You can set one goal per category per month. To update a limit just set it again —
+  and click Set Goal. You can set one goal per category per month. To update a limit just set it again -
   it will overwrite the existing one.
 </p>
 <label>View goals for month:</label>
@@ -158,7 +158,7 @@
       ).join('');
       document.getElementById('summary-table').style.display = 'table';
     } else {
-      document.getElementById('summary-top').textContent = '—';
+      document.getElementById('summary-top').textContent = '-';
       document.getElementById('summary-table').style.display = 'none';
     }
   }
@@ -217,12 +217,12 @@
     const hasThisMonth = summary.total > 0;
     const breakdown = summary.breakdown || [];
 
-    //  Case 1: Real flags found — show them 
+    //  Case 1: Real flags found - show them 
     if (flags.length > 0) {
       el.innerHTML =
         '<p style="color:orange;"><strong>⚠ Unusual spending detected:</strong></p><ul>' +
         flags.map(f =>
-          `<li><strong>${f.category}</strong>: $${f.current} this month vs your average of $${f.average} — that is ${f.percent_over}% above normal.</li>`
+          `<li><strong>${f.category}</strong>: $${f.current} this month vs your average of $${f.average} - that is ${f.percent_over}% above normal.</li>`
         ).join('') +
         '</ul>' +
         '<p>Consider reviewing these categories and setting a spending goal to stay on track.</p>';
@@ -242,7 +242,7 @@
         '<p style="color:green;"><strong>✓ No unusual spending detected this month.</strong></p>' +
         '<p>Your spending looks consistent with your historical patterns across all categories.</p>' +
         (topCat
-          ? `<p>Your highest category this month is <strong>${topCat}</strong> at <strong>$${breakdown[0].total.toFixed(2)}</strong> — keep an eye on it if it tends to spike.</p>`
+          ? `<p>Your highest category this month is <strong>${topCat}</strong> at <strong>$${breakdown[0].total.toFixed(2)}</strong> - keep an eye on it if it tends to spike.</p>`
           : '') +
         '<p style="color:gray;"><em>The threshold is set to flag anything 50% above your usual average. ' +
         'If you want to be more proactive, try setting a spending goal for your top categories.</em></p>';
@@ -252,10 +252,10 @@
       el.innerHTML =
         '<p><strong>No expenses recorded for this month yet.</strong></p>' +
         '<p>Start logging your expenses on the dashboard and come back here to check for unusual patterns.</p>' +
-        '<p style="color:gray;"><em>You have ' + monthsOfData + ' month(s) of history on record — ' +
+        '<p style="color:gray;"><em>You have ' + monthsOfData + ' month(s) of history on record - ' +
         'detection will run automatically once you have some entries for this month.</em></p>';
 
-      //  Case 5: Fallback — no data at all 
+      //  Case 5: Fallback - no data at all 
     } else {
       el.innerHTML =
         '<p><strong>No expense data found.</strong></p>' +
@@ -355,7 +355,7 @@
 
     list.innerHTML = notifs.map(n => `
       <li>
-        ${n.isRead ? '' : '<strong>'} ${n.message} — <small>${n.timestamp}</small> ${n.isRead ? '' : '</strong>'}
+        ${n.isRead ? '' : '<strong>'} ${n.message} - <small>${n.timestamp}</small> ${n.isRead ? '' : '</strong>'}
         ${!n.isRead ? `<button onclick="markRead(${n.alertID})">Mark as read</button>` : ''}
       </li>
     `).join('');
