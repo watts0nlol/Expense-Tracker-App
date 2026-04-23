@@ -71,8 +71,8 @@
     <label>Month</label>
     <input type="month" id="summary-month" style="width:auto;"/>
     <button onclick="loadSummary()">Load</button>
-    <p>Total spent: <strong id="summary-total">—</strong></p>
-    <p>Top category: <strong id="summary-top">—</strong></p>
+    <p>Total spent: <strong id="summary-total">-</strong></p>
+    <p>Top category: <strong id="summary-top">-</strong></p>
     <table id="summary-table" style="display:none;">
       <thead><tr><th>Category</th><th>Total ($)</th><th>%</th></tr></thead>
       <tbody id="summary-body"></tbody>
@@ -107,7 +107,7 @@
     <p>Automatically compares your spending per category this month against your historical average.
     If any category is <strong>50% or more above your usual average</strong>, it gets flagged here.</p>
     <p><strong>Requirements:</strong> At least 2 months of recorded expenses per category.
-    <strong>No setup needed</strong> — just record expenses regularly.</p>
+    <strong>No setup needed</strong> - just record expenses regularly.</p>
     <br/>
     <button onclick="loadUnusual()">Check for Unusual Spending</button>
     <div id="unusual-result"></div>
@@ -121,7 +121,7 @@
     <span class="section-arrow" id="arrow-goals">▼</span>
   </div>
   <div class="section-body" id="body-goals">
-    <p>Set a spending limit per category per month. To update a limit just set it again — it overwrites the existing one.</p>
+    <p>Set a spending limit per category per month. To update a limit just set it again - it overwrites the existing one.</p>
     <label>View goals for month:</label>
     <input type="month" id="goal-month" style="width:auto;"/>
     <button onclick="loadGoals()">Load Goals</button>
@@ -171,7 +171,7 @@
   document.getElementById('new-goal-month').value   = today;
   document.getElementById('reflection-month').value = today;
 
-  // ── Collapsible section toggle ─────────────────────────────────────────────
+  //  Collapsible section toggle 
   function toggleSection(name) {
     const body  = document.getElementById('body-' + name);
     const arrow = document.getElementById('arrow-' + name);
@@ -183,7 +183,7 @@
   // Open notifications by default on load
   toggleSection('notifications');
 
-  // ── Categories ─────────────────────────────────────────────────────────────
+  //  Categories 
   async function loadCategories() {
     const res = await fetch('/expenses/categories');
     if (!res.ok) return;
@@ -193,7 +193,7 @@
     cats.forEach(c => sel.innerHTML += `<option value="${c.categoryID}">${c.name}</option>`);
   }
 
-  // ── Notifications ──────────────────────────────────────────────────────────
+  //  Notifications 
   async function loadNotifications() {
     const res    = await fetch('/analytics/notifications');
     const notifs = await res.json();
@@ -216,7 +216,7 @@
     list.innerHTML = notifs.map(n => `
       <li style="margin-bottom:0.5rem;">
         ${!n.isRead ? '<strong>' : ''}${n.message}${!n.isRead ? '</strong>' : ''}
-        — <small style="color:#888;">${n.timestamp}</small>
+        - <small style="color:#888;">${n.timestamp}</small>
         ${!n.isRead ? `<button onclick="markRead(${n.alertID})" style="margin-left:0.5rem;">Mark as read</button>` : ''}
       </li>
     `).join('');
@@ -235,7 +235,7 @@
     else showErr(data.error);
   }
 
-  // ── Monthly Summary ────────────────────────────────────────────────────────
+  //  Monthly Summary 
   async function loadSummary() {
     clearMsgs();
     const month = document.getElementById('summary-month').value;
@@ -251,12 +251,12 @@
       ).join('');
       document.getElementById('summary-table').style.display = 'table';
     } else {
-      document.getElementById('summary-top').textContent = '—';
+      document.getElementById('summary-top').textContent = '-';
       document.getElementById('summary-table').style.display = 'none';
     }
   }
 
-  // ── Month Comparison ───────────────────────────────────────────────────────
+  //  Month Comparison 
   async function loadComparison() {
     clearMsgs();
     const month     = document.getElementById('compare-month').value;
@@ -293,7 +293,7 @@
     document.getElementById('compare-table').style.display = 'table';
   }
 
-  // ── Unusual Spending ───────────────────────────────────────────────────────
+  //  Unusual Spending 
   async function loadUnusual() {
     clearMsgs();
     const el = document.getElementById('unusual-result');
@@ -318,7 +318,7 @@
       el.innerHTML =
         '<p style="color:orange;"><strong>⚠ Unusual spending detected:</strong></p><ul>' +
         flags.map(f =>
-          `<li><strong>${f.category}</strong>: $${f.current} this month vs your average of $${f.average} — ${f.percent_over}% above normal.</li>`
+          `<li><strong>${f.category}</strong>: $${f.current} this month vs your average of $${f.average} - ${f.percent_over}% above normal.</li>`
         ).join('') + '</ul>' +
         '<p>Consider reviewing these categories and setting a spending goal to stay on track.</p>';
     } else if (monthsOfData < 2) {
@@ -337,7 +337,7 @@
     } else if (monthsOfData >= 2 && !hasThisMonth) {
       el.innerHTML =
         '<p><strong>No expenses recorded for this month yet.</strong></p>' +
-        `<p>You have ${monthsOfData} month(s) of history — detection runs once you log expenses this month.</p>`;
+        `<p>You have ${monthsOfData} month(s) of history - detection runs once you log expenses this month.</p>`;
     } else {
       el.innerHTML =
         '<p><strong>No expense data found.</strong></p>' +
@@ -348,7 +348,7 @@
     loadNotifications();
   }
 
-  // ── Spending Goals ─────────────────────────────────────────────────────────
+  //  Spending Goals 
   async function loadGoals() {
     clearMsgs();
     const month = document.getElementById('goal-month').value;
@@ -395,7 +395,7 @@
     if (res.ok) { showMsg('Goal deleted.'); loadGoals(); }
   }
 
-  // ── Reflections ────────────────────────────────────────────────────────────
+  //  Reflections 
   async function loadReflection() {
     clearMsgs();
     const month = document.getElementById('reflection-month').value;
