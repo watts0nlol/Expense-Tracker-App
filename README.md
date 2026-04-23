@@ -29,12 +29,12 @@ Go to http://127.0.0.1:5000/register and create an account, then log in at /logi
 
 ## Pages
 
-- /dashboard — Add expenses and view your monthly summary
-- /expenses-page — View, filter, edit, delete, and export your expenses
-- /analytics-page — Spending insights, trends, goals, reflections, and unusual spending detection
-- /login — Log in to your account
-- /register — Create a new account
-- /logout — Log out
+- /dashboard - Add expenses and view your monthly summary
+- /expenses-page - View, filter, edit, delete, and export your expenses
+- /analytics-page - Spending insights, trends, goals, reflections, and unusual spending detection
+- /login - Log in to your account
+- /register - Create a new account
+- /logout - Log out
 
 ## Notes
 
