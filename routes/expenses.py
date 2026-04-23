@@ -80,7 +80,7 @@ def get_expenses():
     return jsonify([e.to_dict() for e in expenses]), 200
 
 
-#  Category Breakdown — spending per category 
+#  Category Breakdown - spending per category 
 @expenses_bp.route("/by-category", methods=["GET"])
 def by_category():
     """

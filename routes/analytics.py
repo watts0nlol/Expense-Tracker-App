@@ -65,7 +65,7 @@ def monthly_summary():
     }), 200
 
 
-#  Insights — highlights + month-over-month change 
+#  Insights - highlights + month-over-month change 
 @analytics_bp.route("/insights", methods=["GET"])
 def insights():
     """
@@ -145,7 +145,7 @@ def insights():
     }), 200
 
 
-#  Trends — monthly totals over time 
+#  Trends - monthly totals over time 
 @analytics_bp.route("/trends", methods=["GET"])
 def trends():
     """
@@ -166,7 +166,7 @@ def trends():
 def unusual_spending():
     """
     Covers: 'flag unusual spending compared to previous months'.
-    Uses Analytics.detectAnomalies() — flags categories where this month's
+    Uses Analytics.detectAnomalies() - flags categories where this month's
     spending is 50%+ above the user's historical average for that category.
     Also auto-creates a Notification for any new flags found.
     """
@@ -272,7 +272,7 @@ def save_reflection():
     if not content:
         return jsonify({"error": "content is required"}), 400
 
-    # One reflection per user per month — update if exists
+    # One reflection per user per month - update if exists
     existing = Reflection.query.filter_by(userID=uid, month=month).first()
     if existing:
         existing.content = content
@@ -300,3 +300,12 @@ def mark_read(alert_id):
         return jsonify({"error": "Notification not found"}), 404
     notif.markAsRead()
     return jsonify({"message": "Marked as read"}), 200
+
+@analytics_bp.route("/notifications/clear", methods=["DELETE"])
+def clear_notifications():
+    uid = get_user_id()
+    if not uid:
+        return jsonify({"error": "Not logged in"}), 401
+    Notification.query.filter_by(userID=uid).delete()
+    db.session.commit()
+    return jsonify({"message": "All notifications cleared"}), 200

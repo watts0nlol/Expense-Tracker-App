@@ -3,7 +3,7 @@ from flask_login import UserMixin
 from datetime import datetime
 
 
-# ── User ──────────────────────────────────────────────────────────────────────
+#  User 
 class User(UserMixin, db.Model):
     __tablename__ = "users"
 
@@ -24,7 +24,7 @@ class User(UserMixin, db.Model):
         return f"<User {self.username}>"
 
 
-# ── UserProfile ───────────────────────────────────────────────────────────────
+#  UserProfile 
 class UserProfile(db.Model):
     __tablename__ = "user_profiles"
 
@@ -54,7 +54,7 @@ class UserProfile(db.Model):
         return f"<UserProfile {self.email}>"
 
 
-# ── Category ──────────────────────────────────────────────────────────────────
+#  Category 
 class Category(db.Model):
     __tablename__ = "categories"
 
@@ -84,7 +84,7 @@ class Category(db.Model):
         return f"<Category {self.name}>"
 
 
-# ── Expense ───────────────────────────────────────────────────────────────────
+#  Expense 
 class Expense(db.Model):
     __tablename__ = "expenses"
 
@@ -130,7 +130,7 @@ class Expense(db.Model):
         return f"<Expense ${self.amount} on {self.date}>"
 
 
-# ── SpendingGoal ──────────────────────────────────────────────────────────────
+#  SpendingGoal 
 class SpendingGoal(db.Model):
     __tablename__ = "spending_goals"
 
@@ -176,7 +176,7 @@ class SpendingGoal(db.Model):
         return f"<SpendingGoal {self.month} ${self.amountLimit}>"
 
 
-# ── Reflection ────────────────────────────────────────────────────────────────
+#  Reflection 
 class Reflection(db.Model):
     __tablename__ = "reflections"
 
@@ -207,7 +207,7 @@ class Reflection(db.Model):
         return f"<Reflection {self.month}>"
 
 
-# ── Notification ──────────────────────────────────────────────────────────────
+#  Notification 
 class Notification(db.Model):
     __tablename__ = "notifications"
 
@@ -239,7 +239,7 @@ class Notification(db.Model):
         return f"<Notification {self.alertID}>"
 
 
-# ── Analytics (stateless helper — not a DB table) ─────────────────────────────
+#  Analytics (stateless helper - not a DB table) 
 class Analytics:
     """
     Mirrors the Analytics class from the UML diagram.
@@ -312,7 +312,7 @@ class Analytics:
         return flags
 
 
-# ── Report (stateless helper — not a DB table) ────────────────────────────────
+#  Report (stateless helper - not a DB table) 
 class Report:
     """
     Mirrors the Report class from the UML diagram.

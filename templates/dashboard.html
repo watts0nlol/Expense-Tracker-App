@@ -101,7 +101,7 @@
 
     intro.textContent = `${goals.length} goal(s) for ${month}`;
 
-    // ── Progress bars ────────────────────────────────────────────────────────
+    //  Progress bars 
     container.innerHTML = goals.map(g => {
       const pct      = g.amountLimit > 0 ? Math.min((g.spent / g.amountLimit) * 100, 100) : 0;
       const over     = g.spent > g.amountLimit;
@@ -127,7 +127,7 @@
       `;
     }).join('');
 
-    // ── Pie chart - spending per category this month ─────────────────────────
+    //  Pie chart - spending per category this month 
     const breakdown = summary.breakdown || [];
 
     if (breakdown.length > 0) {
