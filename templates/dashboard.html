@@ -4,13 +4,19 @@
 <h1>Dashboard</h1>
 
 <!-- Spending Goals at top -->
-<h2>Spending Goals - This Month</h2>
+<div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:0.25rem;">
+  <h2 style="margin:0;">Spending Goals</h2>
+  <input type="month" id="goals-month-picker" style="width:auto;"/>
+  <button onclick="loadGoals()">Load</button>
+</div>
 <p id="goals-intro" style="color:#888;font-size:0.875rem;">Loading goals...</p>
 
 <div style="display:flex;gap:2rem;align-items:flex-start;flex-wrap:wrap;">
   <!-- Pie chart -->
-  <div id="chart-container" style="display:none;flex-shrink:0;">
-    <canvas id="spending-pie" width="220" height="220"></canvas>
+  <div id="chart-container" style="flex-shrink:0;">
+    <p id="pie-title" style="font-weight:600;font-size:0.875rem;margin-bottom:0.5rem;"></p>
+    <canvas id="spending-pie" width="220" height="220" style="display:none;"></canvas>
+    <p id="pie-empty" style="color:#aaa;font-size:0.875rem;display:none;">No spending recorded for this month.</p>
     <div id="pie-legend" style="margin-top:0.75rem;font-size:0.8rem;"></div>
   </div>
   <!-- Progress bars -->
@@ -44,6 +50,8 @@
     document.querySelector('h1').insertAdjacentHTML('afterend', '<p>Please <a href="/login">log in</a> to view your dashboard.</p>');
   } else {
     document.getElementById('month-picker').value = new Date().toISOString().slice(0,7);
+    document.getElementById('goals-month-picker').value = new Date().toISOString().slice(0,7);
+    document.getElementById('goals-month-picker').addEventListener('change', loadGoals);
     loadSummary();
     loadGoals();
   }
@@ -80,11 +88,14 @@
   }
 
   async function loadGoals() {
-    const month     = new Date().toISOString().slice(0, 7);
+    const month     = document.getElementById('goals-month-picker').value || new Date().toISOString().slice(0, 7);
     const intro     = document.getElementById('goals-intro');
     const container = document.getElementById('goals-list');
 
-    // Fetch goals and current month spending breakdown together
+    // Update pie chart title to reflect selected month
+    document.getElementById('pie-title').textContent = `Spending breakdown for ${month}`;
+
+    // Fetch goals and spending breakdown for the selected month together
     const [goalsRes, summaryRes] = await Promise.all([
       fetch(`/analytics/goals?month=${month}`),
       fetch(`/analytics/summary?month=${month}`),
@@ -95,55 +106,52 @@
     if (!goals.length) {
       intro.textContent = 'No spending goals set for this month. Set one on the Analytics page.';
       container.innerHTML = '';
-      document.getElementById('chart-container').style.display = 'none';
-      return;
+    } else {
+      intro.textContent = `${goals.length} goal(s) for ${month}`;
+
+      //  Progress bars 
+      container.innerHTML = goals.map(g => {
+        const pct      = g.amountLimit > 0 ? Math.min((g.spent / g.amountLimit) * 100, 100) : 0;
+        const over     = g.spent > g.amountLimit;
+        const warn     = pct >= 80 && !over;
+        const barColor = over ? '#c0392b' : warn ? '#e6a817' : '#2d6a4f';
+        const status   = over
+          ? `<span style="color:#c0392b;font-weight:600;">Over limit by $${(g.spent - g.amountLimit).toFixed(2)}</span>`
+          : warn
+          ? `<span style="color:#e6a817;font-weight:600;">Approaching limit - $${g.remaining.toFixed(2)} left</span>`
+          : `<span style="color:#2d6a4f;">$${g.remaining.toFixed(2)} remaining</span>`;
+
+        return `
+          <div style="margin-bottom:1.25rem;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem;">
+              <span style="font-weight:600;">${g.categoryName || 'All Categories'}</span>
+              <span style="font-size:0.875rem;color:#555;">$${g.spent.toFixed(2)} / $${g.amountLimit.toFixed(2)}</span>
+            </div>
+            <div style="background:#e0e0e0;border-radius:4px;height:14px;overflow:hidden;">
+              <div style="width:${pct}%;background:${barColor};height:100%;border-radius:4px;transition:width 0.4s;"></div>
+            </div>
+            <div style="font-size:0.8rem;margin-top:0.25rem;">${status}</div>
+          </div>
+        `;
+      }).join('');
     }
 
-    intro.textContent = `${goals.length} goal(s) for ${month}`;
-
-    //  Progress bars 
-    container.innerHTML = goals.map(g => {
-      const pct      = g.amountLimit > 0 ? Math.min((g.spent / g.amountLimit) * 100, 100) : 0;
-      const over     = g.spent > g.amountLimit;
-      const warn     = pct >= 80 && !over;
-      const barColor = over ? '#c0392b' : warn ? '#e6a817' : '#2d6a4f';
-      const status   = over
-        ? `<span style="color:#c0392b;font-weight:600;">Over limit by $${(g.spent - g.amountLimit).toFixed(2)}</span>`
-        : warn
-        ? `<span style="color:#e6a817;font-weight:600;">Approaching limit - $${g.remaining.toFixed(2)} left</span>`
-        : `<span style="color:#2d6a4f;">$${g.remaining.toFixed(2)} remaining</span>`;
-
-      return `
-        <div style="margin-bottom:1.25rem;">
-          <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem;">
-            <span style="font-weight:600;">${g.categoryName || 'All Categories'}</span>
-            <span style="font-size:0.875rem;color:#555;">$${g.spent.toFixed(2)} / $${g.amountLimit.toFixed(2)}</span>
-          </div>
-          <div style="background:#e0e0e0;border-radius:4px;height:14px;overflow:hidden;">
-            <div style="width:${pct}%;background:${barColor};height:100%;border-radius:4px;transition:width 0.4s;"></div>
-          </div>
-          <div style="font-size:0.8rem;margin-top:0.25rem;">${status}</div>
-        </div>
-      `;
-    }).join('');
-
-    //  Pie chart - spending per category this month 
+    //  Pie chart - spending per category for selected month 
     const breakdown = summary.breakdown || [];
+    const canvas    = document.getElementById('spending-pie');
+    const empty     = document.getElementById('pie-empty');
 
     if (breakdown.length > 0) {
-      document.getElementById('chart-container').style.display = 'block';
+      canvas.style.display = 'block';
+      empty.style.display  = 'none';
 
       const labels = breakdown.map(b => b.category);
       const values = breakdown.map(b => b.total);
       const colors = labels.map((_, i) => PALETTE[i % PALETTE.length]);
 
-      // Destroy previous chart instance before redrawing
-      if (pieChart) {
-        pieChart.destroy();
-        pieChart = null;
-      }
+      if (pieChart) { pieChart.destroy(); pieChart = null; }
 
-      const ctx = document.getElementById('spending-pie').getContext('2d');
+      const ctx = canvas.getContext('2d');
       pieChart = new Chart(ctx, {
         type: 'pie',
         data: {
@@ -167,7 +175,6 @@
         }
       });
 
-      // Custom legend below chart
       document.getElementById('pie-legend').innerHTML = labels.map((label, i) => `
         <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.3rem;">
           <div style="width:12px;height:12px;border-radius:2px;background:${colors[i]};flex-shrink:0;"></div>
@@ -175,7 +182,10 @@
         </div>
       `).join('');
     } else {
-      document.getElementById('chart-container').style.display = 'none';
+      canvas.style.display = 'none';
+      empty.style.display  = 'block';
+      document.getElementById('pie-legend').innerHTML = '';
+      if (pieChart) { pieChart.destroy(); pieChart = null; }
     }
   }
 </script>

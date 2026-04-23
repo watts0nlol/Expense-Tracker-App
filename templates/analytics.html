@@ -2,52 +2,9 @@
 {% block title %}Analytics{% endblock %}
 {% block content %}
 <h1>Analytics & Insights</h1>
-
-<style>
-  .section {
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    margin-bottom: 0.75rem;
-    background: #fff;
-  }
-  .section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem 1rem;
-    cursor: pointer;
-    user-select: none;
-    background: #f7f6f2;
-    border-radius: 6px;
-  }
-  .section-header:hover { background: #eef0ec; }
-  .section-header h2 {
-    margin: 0;
-    font-size: 1rem;
-    color: #1a1a1a;
-  }
-  .section-arrow {
-    font-size: 0.85rem;
-    color: #888;
-    transition: transform 0.2s;
-  }
-  .section-arrow.open { transform: rotate(180deg); }
-  .section-body {
-    display: none;
-    padding: 1rem;
-    border-top: 1px solid #eee;
-  }
-  .section-body.open { display: block; }
-  .badge-unread {
-    background: #c0392b;
-    color: #fff;
-    font-size: 0.7rem;
-    padding: 0.15rem 0.45rem;
-    border-radius: 99px;
-    margin-left: 0.5rem;
-    font-weight: 600;
-  }
-</style>
+<head>
+    <link rel="stylesheet" href="/static/style.css" />
+</head>
 
 <!-- 1. Notifications -->
 <div class="section">
@@ -157,6 +114,7 @@
     <textarea id="reflection-content" rows="4" placeholder="Write your monthly spending reflection here..."></textarea>
     <br/>
     <button onclick="saveReflection()">Save Reflection</button>
+    <button onclick="deleteReflection()">Delete Reflection</button>
   </div>
 </div>
 
@@ -418,6 +376,20 @@
     const data = await res.json();
     if (res.ok) showMsg('Reflection saved.');
     else showErr(data.error);
+  }
+
+  async function deleteReflection() {
+    if (!confirm('Delete this reflection?')) return;
+    clearMsgs();
+    const month = document.getElementById('reflection-month').value;
+    const res   = await fetch(`/analytics/reflections/${month}`, { method: 'DELETE' });
+    const data  = await res.json();
+    if (res.ok) {
+      showMsg('Reflection deleted.');
+      document.getElementById('reflection-content').value = '';
+    } else {
+      showErr(data.error);
+    }
   }
 
   // Load on page open

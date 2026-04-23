@@ -283,6 +283,16 @@ def save_reflection():
     reflection.saveNote()
     return jsonify(reflection.to_dict()), 201
 
+@analytics_bp.route("/reflections/<string:month>", methods=["DELETE"])
+def delete_reflection(month):
+    uid        = get_user_id()
+    reflection = Reflection.query.filter_by(userID=uid, month=month).first()
+    if not reflection:
+        return jsonify({"error": "No reflection found for this month"}), 404
+    db.session.delete(reflection)
+    db.session.commit()
+    return jsonify({"message": "Reflection deleted"}), 200
+
 
 #  Notifications 
 @analytics_bp.route("/notifications", methods=["GET"])

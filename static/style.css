@@ -112,18 +112,7 @@ button:hover {
   background: #235c42;
 }
 
-/* Secondary-style buttons sitting next to a primary one */
-button + button {
-  background: #fff;
-  color: #333;
-  border: 1px solid #ccc;
-  margin-left: 0.4rem;
-}
 
-button + button:hover {
-  border-color: #2d6a4f;
-  color: #2d6a4f;
-}
 
 /* ── Table ───────────────────────────────────────────────────────────────── */
 table {
@@ -212,4 +201,62 @@ li {
 textarea {
   resize: vertical;
   min-height: 80px;
+}
+
+.section {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+  background: #fff;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  user-select: none;
+  background: #f7f6f2;
+  border-radius: 6px;
+}
+
+.section-header:hover {
+  background: #eef0ec;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  color: #1a1a1a;
+}
+
+.section-arrow {
+  font-size: 0.85rem;
+  color: #888;
+  transition: transform 0.2s;
+}
+
+.section-arrow.open {
+  transform: rotate(180deg);
+}
+
+.section-body {
+  display: none;
+  padding: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.section-body.open {
+  display: block;
+}
+
+.badge-unread {
+  background: #c0392b;
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 99px;
+  margin-left: 0.5rem;
+  font-weight: 600;
 }
